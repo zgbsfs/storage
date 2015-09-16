@@ -30,12 +30,12 @@ parser.add_argument("--insecure", dest='secure', help="Use HTTP for connection",
 parser.add_argument("-t", "--max-tries", help="Max allowed retries for http timeout", type=int, default=5)
 parser.add_argument("-v", "--verbose", help="Be more verbose", default=False, action="store_true")
 parser.add_argument("-q", "--quiet", help="Be less verbose (for use in cron jobs)", default=False, action="store_true")
-
 logger = logging.getLogger("s3-mp-upload")
+
 def handler(signum, frame):
-	print "fail occur"
-	raise Exception("end of time")
-@timeout(300, os.strerror(errno.ETIMEDOUT))
+	raise Exception("failure occur!!")
+sp=0
+#@timeout(sp/25, os.strerror(errno.ETIMEDOUT))
 def do_part_upload(args):
     """
     Upload a part of a MultiPartUpload
@@ -63,7 +63,6 @@ def do_part_upload(args):
     mpu = None
     
     for mp in bucket.list_multipart_uploads():
-	print mp.id
         if mp.id == mpu_id:
             mpu = mp
             break
@@ -82,22 +81,7 @@ def do_part_upload(args):
     try:
         # Do the upload
         t1 = time.time()
-	#print t1
-	'''
-	if random.randint(0,99) > 10: 
-            mpu.upload_part_from_file(StringIO(data), i+1 )
-        else:
-            fp2 = open(fname, 'rb')
-            fp2.seek(start)
-            data2 = fp2.read()
-            fp2.close()
-	    mpu.upload_part_from_file(StringIO(data), i+1 )
-	'''
 	mpu.upload_part_from_file(StringIO(data), i+1)
-	#mpu.upload_part_from_file(StringIO(data2), i+1, cb=progress)
-        #    t2 = time.time() - t1
-        #mpu.upload_part_from_file(StringIO(data), i+1, cb=progress)
-        # Print some timings
         t2 = time.time() - t1
 	#print t2
         s = len(data)/1024./1024.
@@ -113,7 +97,11 @@ def main(src, dest, num_processes=2, split=50, force=False, reduced_redundancy=F
     split_rs = urlparse.urlsplit(dest)
     if split_rs.scheme != "s3":
         raise ValueError("'%s' is not an S3 url" % dest)
-
+    global sp
+    if split>160:
+       sp=split
+    else:
+       sp=160
     s3 = S3Connection()
     s3.is_secure = secure
     '''
@@ -136,6 +124,7 @@ def main(src, dest, num_processes=2, split=50, force=False, reduced_redundancy=F
     src.seek(0,2)
     size = src.tell()
     num_parts = int(ceil(size / part_size))
+    print num_parts
     # If file is less than 5M, just upload it directly
     if size < 5*1024*1024:
         src.seek(0)
@@ -160,51 +149,38 @@ def main(src, dest, num_processes=2, split=50, force=False, reduced_redundancy=F
 	    i+=x
             part_start = part_size*i
             if i == (num_parts-1) and fold_last is True:
-                yield (bucket.name, mpu.id, src.name, i, part_start, part_size*2, secure, max_tries, 0)
+                yield (bucket.name, mpu.id, src.name, i, part_start, part_size+10*1024*1024, secure, max_tries, 0)
                 break
             else:
                 yield (bucket.name, mpu.id, src.name, i, part_start, part_size, secure, max_tries, 0)
 
-    def gen_second_args(list_of_fail,num_parts, fold_last):
-	for i in range(len(list_of_fail)):
-	    #print list_of_fail[i]
-	    part_start = part_size*(list_of_fail[i]-1)
-	    if list_of_fail[i]-1 == (num_parts-1) and fold_last is True:
-		    yield (bucket.name, mpu.id, src.name, list_of_fail[i]-1, part_start, part_size*2, secure, max_tries, 0)
-		    break
-	    else:
-		    print list_of_fail[i]
-		    yield (bucket.name, mpu.id, src.name, list_of_fail[i]-1, part_start, part_size, secure, max_tries, 0)
     # If the last part is less than 5M, just fold it into the previous part
     fold_last = ((size % part_size) < 10*1024*1024)
-    '''
-    pool = Pool(processes=num_processes)
-    t1 = time.time()
-    signal.signal(signal.SIGALRM, handler)
-    signal.alarm(15)
-    b=pool.map_async(do_part_upload, gen_args(num_parts, fold_last)).get(99999999)
-    '''
     # Do the thing
     t1 = time.time()
-    def master_progress(mpu,num_processes,bucket):
+    def master_progress(mpu,num_processes,bucket,num_parts):
 	    x=0
 	    while True:
 		try:
-			pool = Pool(processes=num_processes)	
-			pool.map_async(do_part_upload, gen_args(x,num_parts, fold_last)).get(99999999)
-			src.close()
-			print mpu.get_all_parts()
-			mpu.complete_upload()
-			hdlr = logging.FileHandler("bigmultipart.log")
-			formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-			hdlr.setFormatter(formatter)
-			logger.addHandler(hdlr)
-			logger.setLevel(logging.INFO)
-			t2 = time.time() - t1
-			s = size/1024./1024.
-			logger.info("bucket %s part size = %d ,concurrency = %d ,Finished uploading %0.3fM in %0.3f s (%0.3f MBps)" %  (bucket,split ,num_processes, s, t2, s/t2))
-
-			break
+			if x!=num_parts:
+				print x
+				print num_parts
+				pool = Pool(processes=num_processes)
+				pool.map_async(do_part_upload, gen_args(x,num_parts, fold_last)).get(99999999)
+			else:
+				continue
+                        src.close()
+                        print mpu.get_all_parts()
+                        mpu.complete_upload()
+                        hdlr = logging.FileHandler("bigmultipart.log")
+                        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+                        hdlr.setFormatter(formatter)
+                        logger.addHandler(hdlr)
+                        logger.setLevel(logging.INFO)
+                        t2 = time.time() - t1
+                        s = size/1024./1024.
+                        logger.info("bucket %s part size = %d ,concurrency = %d ,Finished uploading %0.3fM in %0.3f s (%0.3f MBps)" %  (bucket,split ,num_processes, s, t2, s/t2))
+                        break
 		except KeyboardInterrupt:
 			logger.warn("Received KeyboardInterrupt, canceling upload")
 			pool.terminate()
@@ -212,56 +188,22 @@ def main(src, dest, num_processes=2, split=50, force=False, reduced_redundancy=F
 			break
 		except Exception, err:
 			logger.error("Encountered an error, canceling upload aaaaaaaaaaaa")
+			traceback.print_exc()
 			print mpu.get_all_parts()
 			x= len(mpu.get_all_parts())
 			print x
-			logger.error(err)
 			pool.terminate()
-			signal.alarm(int(random.expovariate(1/40.0)))
+			logger.error(err)
+			signal.alarm(int(random.expovariate(1.0/120.0)))
 			#break
     t1 = time.time()
-    print mpu.get_all_parts()
+    #print mpu.get_all_parts()
     signal.signal(signal.SIGALRM, handler)
-    signal.alarm(int(random.expovariate(1/40.0)))
-#    signal.alarm(5)
-    master_progress(mpu,num_processes,bucket)
-    '''
-    while True:
-	    try:
-		# Create a pool of workers
-	#	t1 = time.time()
-		print b
-		while(b.count(None)!=0):
-			b.remove(None)
-		b = pool.map_async(do_part_upload, gen_second_args(b,num_parts, fold_last)).get(99999999)
-		# Print out some timings
-		src.close()
-		#print mpu.get_all_parts()
-		mpu.complete_upload()
-		t2 = time.time() - t1
-		#if random.uniform(0,1)> 
-		#print poisson.pmf(1,t2/50)
-		s = size/1024./1024.
-		# Finalize
-		hdlr = logging.FileHandler("bigmultipart.log")
-		formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-		hdlr.setFormatter(formatter)
-		logger.addHandler(hdlr)
-		logger.setLevel(logging.INFO)
-		logger.info("bucket %s part size = %d ,concurrency = %d ,Finished uploading %0.3fM in %0.3f s (%0.3f MBps)" % 
-			     (bucket,split ,num_processes, s, t2, s/t2))
-		signal.alarm(0)
-		break
-	    except KeyboardInterrupt:
-		logger.warn("Received KeyboardInterrupt, canceling upload")
-		pool.terminate()
-		mpu.cancel_upload()
-		break
-	    except Exception, err:
-		logger.error("Encountered an error, canceling upload aaaaaaaaaaaa")
-		logger.error(err)
-#		mpu.cancel_upload()
-	'''
+    signal.alarm(int(random.expovariate(1.0/120.0)))
+#    signal.alarm(15)
+    master_progress(mpu,num_processes,bucket,num_parts)
+#    mpu.complete_upload()
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     args = parser.parse_args()
