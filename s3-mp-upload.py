@@ -14,10 +14,11 @@ from boto.s3.connection import S3Connection
 import random
 import sys, traceback
 import signal
+import compress
 
 parser = argparse.ArgumentParser(description="Transfer large files to S3",
         prog="s3-mp-upload")
-parser.add_argument("src", type=file, help="The file to transfer")
+parser.add_argument("filepath",  help="The file to transfer")
 parser.add_argument("dest", help="The S3 destination object")
 parser.add_argument("-np", "--num-processes", help="Number of processors to use",
         type=int, default=2)
@@ -93,9 +94,30 @@ def do_part_upload(args):
         logger.info("Retry request %d of max %d times" % (current_tries, max_tries))
         do_part_upload(args)
 
-def main(src, dest, num_processes=2, split=50, force=False, reduced_redundancy=False, verbose=False, quiet=False, secure=False, max_tries=5, simulate=120):
+
+
+
+def main(filepath, dest, num_processes=2, split=50, force=False, reduced_redundancy=False, verbose=False, quiet=False, secure=False, max_tries=5, simulate=0):
     # Check that dest is a valid S3 url
     split_rs = urlparse.urlsplit(dest)
+    uploadFileNames = []
+    keyfilepath = []
+    if os.path.isfile(filepath):
+	new_path = compress.CompressBigFile(filepath,split_rs.path,filepath,filepath,True)
+	uploadFileNames.append(new_path)
+	keyfilepath.append(new_path.replace(new_path,split_rs.path))
+	    
+    else:
+	new_path = compress.Compression(filepath,split_rs.path)
+	for (sourceDir, dirname, filename) in os.walk(new_path):
+		for f in filename:
+			sourcepath =  os.path.join(sourceDir, f)		
+			uploadFileNames.append(sourcepath)
+			keyfilepath.append(sourcepath.replace(new_path,split_rs.path))
+    print uploadFileNames
+    print keyfilepath
+    return 
+    src = open(filepath, "rw+")
     if split_rs.scheme != "s3":
         raise ValueError("'%s' is not an S3 url" % dest)
     global sp
@@ -105,11 +127,10 @@ def main(src, dest, num_processes=2, split=50, force=False, reduced_redundancy=F
        sp=160
     s3 = S3Connection()
     s3.is_secure = secure
-
     bucket = s3.get_bucket(split_rs.netloc)
     if bucket == None:
         raise ValueError("'%s' is not a valid bucket" % split_rs.netloc)
-    key = bucket.get_key(split_rs.path)
+    key = bucket.get_key(filepath)
     # See if we're overwriting an existing key
     if key is not None:
         if not force:
@@ -119,6 +140,7 @@ def main(src, dest, num_processes=2, split=50, force=False, reduced_redundancy=F
     src.seek(0,2)
     size = src.tell()
     num_parts = int(ceil(size / part_size))
+
     # If file is less than 5M, just upload it directly
     if size < 5*1024*1024:
         src.seek(0)
@@ -135,7 +157,7 @@ def main(src, dest, num_processes=2, split=50, force=False, reduced_redundancy=F
         return
 
     # Create the multi-part upload object
-    mpu = bucket.initiate_multipart_upload(split_rs.path, reduced_redundancy=reduced_redundancy)
+    mpu = bucket.initiate_multipart_upload(filepath, reduced_redundancy=reduced_redundancy)
     logger.info("Initialized upload: %s" % mpu.id)
     # Generate arguments for invocations of do_part_upload
     def gen_args(x, fold_last, upload_list):
@@ -144,21 +166,8 @@ def main(src, dest, num_processes=2, split=50, force=False, reduced_redundancy=F
             part_start = part_size*(i-1)
             if i == num_parts and fold_last is True:
                 yield (bucket.name, mpu.id, src.name, i, part_start, part_size+10*1024*1024, secure, max_tries, 0)
-	    elif upload_list==None:
-		print "finish  \n " +str(upload_list)
-		break
-            else:
+	    else:
                 yield (bucket.name, mpu.id, src.name, i, part_start, part_size, secure, max_tries, 0)
-	    '''
-	    finished_list=mpu.get_all_parts()
-	    for i in finished_list:
-                a=int(str(i).split(" ")[1].split(">")[0])
-            #    print "what to del " + str(a)
-		if a in upload_list:
-	                upload_list.remove(a)
-
-	#	print upload_list
-            '''
     # If the last part is less than 5M, just fold it into the previous part
     fold_last = ((size % part_size) < 10*1024*1024)
     upload_list=[]
