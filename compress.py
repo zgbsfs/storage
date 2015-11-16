@@ -6,7 +6,7 @@ import sys
 import pickle
 
 MAX_SIZE = 5 * 1000 * 1000
-Threshold = 10
+Threshold = 50
 MB = 1024*1024
 
 def Combine_files(combine_list,sourceDir,WaitingToUpload,FileCounter):
@@ -15,6 +15,7 @@ def Combine_files(combine_list,sourceDir,WaitingToUpload,FileCounter):
 		for fname in combine_list:
 			with open(fname) as infile:
 				outfile.write(infile.read())
+#				os.remove(fname)
 	return CombinedFileName
 
 def Metadata(MetaFileInfo,MetaSizeInfo,NewFileName):
@@ -30,7 +31,7 @@ def BigFileMetadata(Metafile,WaitingToUpload):
 		pickle.dump(Metafile,f)
 
 
-def CompressBigFile(BigFilePath,S3KeyName,rootDir,WaitingToUpload,isaFile):
+def CompressBigFile(BigFilePath,S3KeyName,rootDir,WaitingToUpload,InDir):
 
 	CompressedFile = BigFilePath.replace(rootDir, WaitingToUpload) +".compressed"
 	data = open(BigFilePath, 'r').read()
@@ -40,10 +41,11 @@ def CompressBigFile(BigFilePath,S3KeyName,rootDir,WaitingToUpload,isaFile):
 		output.write(data)
 	finally:
 		output.close()
-	if isaFile:
-		return os.path.abspath(CompressedFile)
-	else:
+#		os.remove(BigFilePath)
+	if InDir:
 		return os.path.abspath(CompressedFile),CompressedFile
+	else:
+		return os.path.abspath(CompressedFile)
 
 
 def MakeDir(directory):
@@ -64,7 +66,7 @@ def Compression(rootDir,S3KeyName):
 	dirsize=0
 	total_size=0
 	FileCounter = 0
-
+	
 	WaitingToUpload = os.getcwd()+S3KeyName
 	MakeDir(WaitingToUpload)
 	for ( sourceDir, dirname, filename) in os.walk(rootDir):
@@ -74,7 +76,7 @@ def Compression(rootDir,S3KeyName):
 		    if  total_size < Threshold * MB:
 			    if os.path.getsize(sourcepath) > Threshold * MB:
 				#big file list
-				Newpath , Metapath = CompressBigFile(sourcepath,S3KeyName,rootDir,WaitingToUpload)
+				Newpath , Metapath = CompressBigFile(sourcepath,S3KeyName,rootDir,WaitingToUpload,True)
 				UploadBigFileList.append(Newpath)
 			        BigFileList.append(Metapath)
 				WriteToBigFileMetaList.append(Metapath.replace(rootDir,S3KeyName))
@@ -94,12 +96,10 @@ def Compression(rootDir,S3KeyName):
 			combine_list=[]
 			WriteToMeta_list=[]
 			size_list=[]
-			
-		#    pairs.append((os.path.getsize(sourcepath)/(1024.0), sourcepath))
-		#    pairs.sort(key=lambda s: s[0])
-		    #print sourcepath
-#			print sourceDir + "    "+str(dirsize/(1024.0*1024))
+	#break the for loop ,combined remaining files
+	FileCounter = FileCounter +1
+	CombinedFileName = Combine_files(combine_list,rootDir,WaitingToUpload,FileCounter)
+	Newpath = os.path.abspath(Metadata(WriteToMeta_list,size_list,CombinedFileName))
+	NewFileName.append(Newpath)	
+
 	BigFileMetadata(BigFileList,WaitingToUpload)
-
-	return WaitingToUpload
-
