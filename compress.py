@@ -1,3 +1,5 @@
+from shutil import copyfileobj
+import magic
 import gzip
 import os
 import os.path
@@ -33,15 +35,20 @@ def BigFileMetadata(Metafile,WaitingToUpload):
 
 def CompressBigFile(BigFilePath,S3KeyName,rootDir,WaitingToUpload,InDir):
 
+	if  str(magic.from_file(BigFilePath,mime=True))=="video/mp4":
+		return  BigFilePath
 	CompressedFile = BigFilePath.replace(rootDir, WaitingToUpload) +".compressed"
-	data = open(BigFilePath, 'r').read()
 
-	output = gzip.open(CompressedFile, 'wb')
+	with open(BigFilePath, 'rb') as input:
+	    with gzip.open(CompressedFile, 'wb') as output:
+        	copyfileobj(input, output)
+	"""
 	try:
 		output.write(data)
 	finally:
 		output.close()
 #		os.remove(BigFilePath)
+	"""
 	if InDir:
 		return os.path.abspath(CompressedFile),CompressedFile
 	else:

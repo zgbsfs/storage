@@ -178,7 +178,7 @@ def main(uploadFileNames,filepath, dest, num_processes=2, split=50, force=False,
 	    else:
                 yield (bucket.name, mpu.id, src.name, i, part_start, part_size, secure, max_tries, 0)
     # If the last part is less than 5M, just fold it into the previous part
-    fold_last = ((size % part_size) < 5*1024*1024)
+    fold_last = ((size % part_size) < 10*1024*1024)
     upload_list=[]
     for i in range(1,num_parts+1):   
 	    upload_list.append(i)
@@ -190,8 +190,7 @@ def main(uploadFileNames,filepath, dest, num_processes=2, split=50, force=False,
 		try:
 			if x!=num_parts:
 				pool = NoDaemonProcessPool(processes=num_processes)
-				a = pool.map_async(do_part_upload, gen_args(x,fold_last,upload_list)).get(99999999)
-			print a 
+				pool.map_async(do_part_upload, gen_args(x,fold_last,upload_list)).get(99999999)
                         src.close()
 	#		print "finish" +str(mpu.get_all_parts())
                         mpu.complete_upload()
@@ -277,10 +276,10 @@ if __name__ == "__main__":
 			sourcepath =  os.path.join(sourceDir, f)
                         uploadFileNames.append(sourcepath)
 			s +=os.path.getsize(sourcepath) 
+
     print int(bandwidth/int(arg_dict['split']))	
     t3 = time.time() - t1
-
-    Mainpool = NoDaemonProcessPool(processes=5)
+    Mainpool = NoDaemonProcessPool(processes=32)
     func = partial(main,**arg_dict)
     Mainpool.map_async(func,uploadFileNames).get(99999999)
     t2 = time.time() - t1
@@ -288,7 +287,7 @@ if __name__ == "__main__":
     s3 = S3Connection()
     bucket = s3.get_bucket(split_rs.netloc)
     s = s/1024/1024
-    logger.error("compression time = %0.3f ,bucket %s part size = %d ,concurrency = %d ,Finished uploading %0.3fM in %0.3f s (%0.3f MBps)" %  (t3,bucket,arg_dict['split'] ,arg_dict['num_processes'], s, t2, s/t2))
+    logger.error("compress_time = %0.3f ,File %s part size = %d ,concurrency = %d ,Finished uploading %0.3fM in %0.3f s (%0.3f MBps)" %  (t3,arg_dict['filepath'],arg_dict['split'] ,arg_dict['num_processes'], s, t2, s/t2))
     print "finish"
     for mp in bucket.list_multipart_uploads():
 	    mp.cancel_upload()
