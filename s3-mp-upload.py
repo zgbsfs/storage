@@ -16,9 +16,8 @@ import random
 import sys, traceback
 import signal
 import compress
-import uploadfunction
 from functools import partial
-import scandir
+import subprocess
 
 parser = argparse.ArgumentParser(description="Transfer large files to S3",
         prog="s3-mp-upload")
@@ -29,13 +28,13 @@ parser.add_argument("-np", "--num-processes", help="Number of processors to use"
 parser.add_argument("-f", "--force", help="Overwrite an existing S3 key",
         action="store_true")
 parser.add_argument("-s", "--split", help="Split size, in Mb", type=int, default=50)
+parser.add_argument("-Thres", "--Threshold", help="compression size", type=int)
 parser.add_argument("-rrs", "--reduced-redundancy", help="Use reduced redundancy storage. Default is standard.", default=False,  action="store_true")
 parser.add_argument("--insecure", dest='secure', help="Use HTTP for connection",
         default=True, action="store_false")
 parser.add_argument("-t", "--max-tries", help="Max allowed retries for http timeout", type=int, default=5)
-parser.add_argument("-v", "--verbose", help="Be more verbose", default=False, action="store_true")
-parser.add_argument("-q", "--quiet", help="Be less verbose (for use in cron jobs)", default=False, action="store_true")
 parser.add_argument("-S", "--simulate", help="Enable simulation with the time per error ",type=int ,default=0)
+
 logger = logging.getLogger("s3-mp-upload")
 
 class NoDaemonProcess(multiprocessing.Process):
@@ -54,7 +53,8 @@ class NoDaemonProcessPool(multiprocessing.pool.Pool):
 def handler(signum, frame):
 	raise Exception("failure occur!!")
 sp=0
-#@timeout(sp/25, os.strerror(errno.ETIMEDOUT))
+
+@timeout(sp/25, os.strerror(errno.ETIMEDOUT))
 def do_part_upload(args,current_tries=1):
     """
     Upload a part of a MultiPartUpload
@@ -103,6 +103,7 @@ def do_part_upload(args,current_tries=1):
 	#print t2
         s = len(data)/1024./1024.
 	logger.info("Uploaded part %s (%0.2fM) in %0.3f s at %0.2f MBps" % (i, s, t2, s/t2))
+	return fname
     except Exception, err:
 	current_tries = current_tries+1
 	#traceback.print_exc()
@@ -114,7 +115,7 @@ def do_part_upload(args,current_tries=1):
 		return
 
 
-def main(uploadFileNames,filepath, dest, num_processes=2, split=50, force=False, reduced_redundancy=False, verbose=False, quiet=False, secure=False, max_tries=5, simulate=0):
+def main(uploadFileNames,filepath, dest, num_processes=2, split=50, force=False, reduced_redundancy=False, verbose=False, quiet=False, secure=False, max_tries=5, simulate=0,Threshold=0):
     # Check that dest is a valid S3 url
     split_rs = urlparse.urlsplit(dest)
     filepath = uploadFileNames
@@ -122,6 +123,7 @@ def main(uploadFileNames,filepath, dest, num_processes=2, split=50, force=False,
 
     filepath = uploadFileNames.replace(os.getcwd(),"")
     print filepath
+
     if split_rs.scheme != "s3":
         raise ValueError("'%s' is not an S3 url" % dest)
     global sp
@@ -129,6 +131,8 @@ def main(uploadFileNames,filepath, dest, num_processes=2, split=50, force=False,
        sp=split
     else:
        sp=160
+
+
     s3 = S3Connection()
     s3.is_secure = secure
     bucket = s3.get_bucket(split_rs.netloc)
@@ -146,7 +150,7 @@ def main(uploadFileNames,filepath, dest, num_processes=2, split=50, force=False,
     num_parts = int(ceil(size / part_size))
 
     # If file is less than 5M, just upload it directly
-    if size < 5*1024*1024:
+    if size < split*1024*1024:
         src.seek(0)
         t1 = time.time()
         k = boto.s3.key.Key(bucket,filepath)
@@ -168,12 +172,13 @@ def main(uploadFileNames,filepath, dest, num_processes=2, split=50, force=False,
 	print upload_list
         for i in upload_list:
             part_start = part_size*(i-1)
-            if i == num_parts and fold_last is True:
+	    if i == num_parts and fold_last is True:
+	    	print "fold_last" +src.name
                 yield (bucket.name, mpu.id, src.name, i, part_start, part_size+10*1024*1024, secure, max_tries, 0)
 	    else:
                 yield (bucket.name, mpu.id, src.name, i, part_start, part_size, secure, max_tries, 0)
     # If the last part is less than 5M, just fold it into the previous part
-    fold_last = ((size % part_size) < 10*1024*1024)
+    fold_last = ((size % part_size) < 5*1024*1024)
     upload_list=[]
     for i in range(1,num_parts+1):   
 	    upload_list.append(i)
@@ -185,17 +190,19 @@ def main(uploadFileNames,filepath, dest, num_processes=2, split=50, force=False,
 		try:
 			if x!=num_parts:
 				pool = NoDaemonProcessPool(processes=num_processes)
-				pool.map_async(do_part_upload, gen_args(x,fold_last,upload_list)).get(99999999)
+				a = pool.map_async(do_part_upload, gen_args(x,fold_last,upload_list)).get(99999999)
+			print a 
                         src.close()
-			print "finish" +str(mpu.get_all_parts())
+	#		print "finish" +str(mpu.get_all_parts())
                         mpu.complete_upload()
-                        hdlr = logging.FileHandler("bigmultipart.log")
-                        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-                        hdlr.setFormatter(formatter)
-                        logger.addHandler(hdlr)
-                        logger.setLevel(logging.INFO)
+                        #hdlr = logging.FileHandler("bigmultipart.log")
+                        #formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+                        #hdlr.setFormatter(formatter)
+                        #logger.addHandler(hdlr)
+                        #logger.setLevel(logging.INFO)
                         t2 = time.time() - t1
                         s = size/1024./1024.
+			print str(bucket) + str(s) + str(t2) + str(s/t2)
                         logger.info("bucket %s part size = %d ,concurrency = %d ,Finished uploading %0.3fM in %0.3f s (%0.3f MBps)" %  (bucket,split ,num_processes, s, t2, s/t2))
                         break
 		except KeyboardInterrupt:
@@ -205,6 +212,7 @@ def main(uploadFileNames,filepath, dest, num_processes=2, split=50, force=False,
 			break
 		except Exception, err:
 			logger.error("Encountered an error, canceling upload aaaaaaaaaaaa")
+			print src.name
 			logger.error(err)
 			pool.terminate()
 			traceback.print_exc()
@@ -223,23 +231,33 @@ def main(uploadFileNames,filepath, dest, num_processes=2, split=50, force=False,
 			#break
 
     t1 = time.time()
-    #print mpu.get_all_parts()
     signal.signal(signal.SIGALRM, handler)
+    #print mpu.get_all_parts()
     print simulate
     if simulate!=0:
     	signal.alarm(int(random.expovariate(1.0/simulate)))
    #    signal.alarm(10)
     master_progress(mpu,num_processes,bucket,upload_list)
+def getBandwidth():
+	proc = subprocess.Popen('speedtest-cli', stdout=subprocess.PIPE)
+
+	strlist = proc.stdout.read().split(" ")
+	print "bandwidth = "+ strlist[len(strlist)-2]
+	return  strlist[len(strlist)-2]
 if __name__ == "__main__":
+    
     logging.basicConfig(level=logging.INFO)
     args = parser.parse_args()
     arg_dict = vars(args)
-    if arg_dict['quiet'] == True:
-        logger.setLevel(logging.WARNING)
-    if arg_dict['verbose'] == True:
-        logger.setLevel(logging.DEBUG)
+    
     logger.debug("CLI args: %s" % args)
- 
+    hdlr = logging.FileHandler("bigmultipart.log")
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    hdlr.setFormatter(formatter)
+    logger.addHandler(hdlr)
+    logger.setLevel(logging.ERROR)
+    bandwidth = float(getBandwidth())
+
     split_rs = urlparse.urlsplit(arg_dict['dest'])
     filepath = arg_dict['filepath']
     print arg_dict
@@ -253,23 +271,24 @@ if __name__ == "__main__":
         uploadFileNames.append(new_path)
 	s += os.path.getsize(new_path)
     else:
-        compress.Compression(filepath,split_rs.path)
+        compress.Compression(filepath,split_rs.path,arg_dict['Threshold'])
         for (sourceDir, dirname, filename) in os.walk(new_path):
 		for f in filename:
 			sourcepath =  os.path.join(sourceDir, f)
                         uploadFileNames.append(sourcepath)
 			s +=os.path.getsize(sourcepath) 
+    print int(bandwidth/int(arg_dict['split']))	
+    t3 = time.time() - t1
 
-
-    Mainpool = NoDaemonProcessPool(processes=4)
-
+    Mainpool = NoDaemonProcessPool(processes=5)
     func = partial(main,**arg_dict)
     Mainpool.map_async(func,uploadFileNames).get(99999999)
     t2 = time.time() - t1
+    print "total time= "+str(t2)
     s3 = S3Connection()
     bucket = s3.get_bucket(split_rs.netloc)
     s = s/1024/1024
-    logger.error("bucket %s part size = %d ,concurrency = %d ,Finished uploading %0.3fM in %0.3f s (%0.3f MBps)" %  (bucket,arg_dict['split'] ,arg_dict['num_processes'], s, t2, s/t2))
+    logger.error("compression time = %0.3f ,bucket %s part size = %d ,concurrency = %d ,Finished uploading %0.3fM in %0.3f s (%0.3f MBps)" %  (t3,bucket,arg_dict['split'] ,arg_dict['num_processes'], s, t2, s/t2))
     print "finish"
     for mp in bucket.list_multipart_uploads():
 	    mp.cancel_upload()

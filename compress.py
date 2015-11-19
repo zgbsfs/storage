@@ -6,7 +6,7 @@ import sys
 import pickle
 
 MAX_SIZE = 5 * 1000 * 1000
-Threshold = 50
+#Threshold = 30
 MB = 1024*1024
 
 def Combine_files(combine_list,sourceDir,WaitingToUpload,FileCounter):
@@ -52,7 +52,7 @@ def MakeDir(directory):
 	if not os.path.exists(directory):
 		    os.makedirs(directory)
 
-def Compression(rootDir,S3KeyName):
+def Compression(rootDir,S3KeyName,Threshold):
 	destDir=''
 	bucket_name='asdf'
 	pairs = []
@@ -101,5 +101,5 @@ def Compression(rootDir,S3KeyName):
 	CombinedFileName = Combine_files(combine_list,rootDir,WaitingToUpload,FileCounter)
 	Newpath = os.path.abspath(Metadata(WriteToMeta_list,size_list,CombinedFileName))
 	NewFileName.append(Newpath)	
-
-	BigFileMetadata(BigFileList,WaitingToUpload)
+	if BigFileList: 
+		BigFileMetadata(BigFileList,WaitingToUpload)
