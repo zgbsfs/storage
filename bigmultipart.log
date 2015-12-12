@@ -1,0 +1,294 @@
+2015-11-20 17:58:21,821 ERROR compress_time = 20.147 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 458.000M in 106.502 s (4.300 MBps)
+2015-11-28 16:29:07,541 ERROR compress_time = 19.524 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 458.000M in 142.588 s (3.212 MBps)
+2015-11-28 16:32:32,678 ERROR compress_time = 9.096 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 458.000M in 129.127 s (3.547 MBps)
+2015-11-28 18:03:31,603 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,605 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,605 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,606 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,608 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,609 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,611 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,612 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,616 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,616 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,617 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,617 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,618 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,618 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,618 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,621 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,622 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,623 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,624 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,625 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,626 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,623 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,621 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,627 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,627 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,620 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,636 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,639 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,665 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,665 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:03:31,666 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,666 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,643 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,667 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,667 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:03:31,668 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,536 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,536 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,538 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,538 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,539 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,539 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,542 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,542 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,541 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,541 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,543 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,539 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,543 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,539 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,545 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,545 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,552 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,552 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,553 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,553 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,554 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,554 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,553 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,553 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,557 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,557 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,559 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,536 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,559 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,559 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,536 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,536 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,559 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,536 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,562 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,562 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,564 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,564 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,565 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,565 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,568 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,568 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,570 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,570 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,571 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,571 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,573 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,573 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,574 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,574 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,574 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,574 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,577 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,577 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,575 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,577 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,575 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,577 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,578 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,578 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,578 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,578 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,580 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,580 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,587 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,587 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,588 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,588 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,594 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,594 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,595 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,595 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,595 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,595 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,596 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,596 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,596 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,596 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,597 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,597 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,602 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,602 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,605 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,605 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,602 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,602 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,602 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,602 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,614 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,615 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,614 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,615 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,616 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,616 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,616 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,616 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,613 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,613 ERROR Encountered an error, canceling upload aaaaaaaaaaaa
+2015-11-28 18:06:10,618 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:06:10,618 ERROR [Errno 35] Resource temporarily unavailable
+2015-11-28 18:10:29,264 ERROR compress_time = 6.312 ,File /Users/ytlin/Desktop/java1.8/ part size = 15 ,concurrency = 32 ,Finished uploading 637.000M in 128.394 s (4.961 MBps)
+2015-11-28 18:13:33,938 ERROR compress_time = 5.949 ,File /Users/ytlin/Desktop/java1.8/ part size = 15 ,concurrency = 32 ,Finished uploading 458.000M in 101.616 s (4.507 MBps)
+2015-11-28 18:21:40,184 ERROR compress_time = 6.588 ,File /Users/ytlin/Desktop/java1.8/ part size = 15 ,concurrency = 32 ,Finished uploading 458.000M in 72.868 s (6.285 MBps)
+2015-11-28 19:04:23,986 ERROR compress_time = 20.412 ,File /Users/ytlin/Desktop/java1.8/ part size = 55 ,concurrency = 10 ,Finished uploading 459.000M in 239.314 s (1.918 MBps)
+2015-11-29 02:32:59,581 ERROR compress_time = 18.625 ,File /Users/ytlin/Desktop/java1.8/ part size = 55 ,concurrency = 10 ,Finished uploading 459.000M in 110.284 s (4.162 MBps)
+2015-11-29 02:36:54,347 ERROR compress_time = 7.885 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 10 ,Finished uploading 456.000M in 94.923 s (4.804 MBps)
+2015-11-29 02:45:30,292 ERROR compress_time = 5.196 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 10 ,Finished uploading 458.000M in 95.668 s (4.787 MBps)
+2015-11-29 02:48:57,728 ERROR compress_time = 5.194 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 10 ,Finished uploading 458.000M in 90.777 s (5.045 MBps)
+2015-11-29 02:55:07,558 ERROR compress_time = 5.176 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 10 ,Finished uploading 458.000M in 99.588 s (4.599 MBps)
+2015-11-29 02:58:24,016 ERROR compress_time = 5.254 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 10 ,Finished uploading 458.000M in 91.100 s (5.027 MBps)
+2015-11-29 03:27:36,825 ERROR compress_time = 5.172 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 10 ,Finished uploading 458.000M in 96.182 s (4.762 MBps)
+2015-11-29 03:34:44,766 ERROR compress_time = 5.187 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 10 ,Finished uploading 458.000M in 98.047 s (4.671 MBps)
+2015-12-04 17:35:06,166 ERROR compress_time = 0.027 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 10 ,Finished uploading 0.000M in 0.121 s (0.000 MBps)
+2015-12-04 17:39:44,400 ERROR compress_time = 50.375 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 382.000M in 50.436 s (7.574 MBps)
+2015-12-04 17:44:41,696 ERROR compress_time = 44.608 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 382.000M in 44.722 s (8.542 MBps)
+2015-12-04 17:48:47,634 ERROR compress_time = 58.892 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 382.000M in 58.959 s (6.479 MBps)
+2015-12-04 19:16:50,683 ERROR compress_time = 14.028 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 382.000M in 14.109 s (27.075 MBps)
+2015-12-05 11:37:14,676 ERROR compress_time = 41.559 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 10 ,Finished uploading 0.000M in 41.616 s (0.000 MBps)
+2015-12-05 11:50:37,340 ERROR compress_time = 46.284 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 382.000M in 46.350 s (8.242 MBps)
+2015-12-05 14:52:18,705 ERROR compress_time = 52.673 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 382.000M in 52.757 s (7.241 MBps)
+2015-12-05 16:00:25,423 ERROR compress_time = 42.526 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 455.000M in 42.593 s (10.683 MBps)
+2015-12-06 20:56:15,071 ERROR compress_time = 35.439 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 488.000M in 35.500 s (13.747 MBps)
+2015-12-07 00:01:54,856 ERROR compress_time = 51.891 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 532.000M in 51.963 s (10.238 MBps)
+2015-12-07 02:59:11,341 ERROR compress_time = 52.093 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 532.000M in 52.105 s (10.210 MBps)
+2015-12-07 03:11:23,352 ERROR compress_time = 40.323 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 532.000M in 61.931 s (8.590 MBps)
+2015-12-07 22:15:08,276 ERROR compress_time = 53.625 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 455.000M in 338.058 s (1.346 MBps)
+2015-12-07 22:30:02,647 ERROR compress_time = 39.703 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 76.000M in 39.711 s (1.914 MBps)
+2015-12-08 10:51:11,314 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 0.000M in 0.008 s (0.000 MBps)
+2015-12-08 22:43:19,049 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 0.000M in 0.010 s (0.000 MBps)
+2015-12-08 22:43:48,336 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 32 ,Finished uploading 0.000M in 0.008 s (0.000 MBps)
+2015-12-09 16:11:10,384 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 1 ,Finished uploading 0.000M in 7.013 s (0.000 MBps)
+2015-12-09 16:26:50,235 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 1 ,Finished uploading 0.000M in 2.052 s (0.000 MBps)
+2015-12-09 16:29:51,082 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 1 ,Finished uploading 0.000M in 14.007 s (0.000 MBps)
+2015-12-09 16:44:54,668 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 3 ,Finished uploading 0.000M in 17.013 s (0.000 MBps)
+2015-12-09 16:56:05,516 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 3 ,Finished uploading 0.000M in 18.018 s (0.000 MBps)
+2015-12-09 17:04:47,092 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 18.019 s (0.000 MBps)
+2015-12-09 17:08:36,745 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 25.016 s (0.000 MBps)
+2015-12-09 17:16:18,489 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 136.947 s (0.000 MBps)
+2015-12-09 17:16:18,489 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 136.947 s (0.000 MBps)
+2015-12-09 17:16:18,489 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 136.947 s (0.000 MBps)
+2015-12-09 17:16:18,489 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 136.947 s (0.000 MBps)
+2015-12-09 17:16:18,489 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 136.947 s (0.000 MBps)
+2015-12-09 17:16:18,489 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 136.947 s (0.000 MBps)
+2015-12-09 17:16:18,489 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 136.947 s (0.000 MBps)
+2015-12-09 17:16:18,489 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 136.947 s (0.000 MBps)
+2015-12-09 17:16:18,489 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 136.947 s (0.000 MBps)
+2015-12-09 17:16:18,489 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 136.947 s (0.000 MBps)
+2015-12-09 17:16:18,489 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 136.947 s (0.000 MBps)
+2015-12-09 17:16:18,489 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 136.947 s (0.000 MBps)
+2015-12-09 17:16:18,489 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 136.947 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 11:01:53,125 ERROR compress_time = 39.792 ,File /Users/ytlin/Desktop/java1.8/ part size = 30 ,concurrency = 5 ,Finished uploading 0.000M in 58.109 s (0.000 MBps)
+2015-12-10 13:16:40,332 ERROR compress_time = 43.531 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 78.948 s (0.000 MBps)
+2015-12-10 13:16:40,332 ERROR compress_time = 43.531 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 78.948 s (0.000 MBps)
+2015-12-10 13:16:40,332 ERROR compress_time = 43.531 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 78.948 s (0.000 MBps)
+2015-12-10 13:16:40,332 ERROR compress_time = 43.531 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 78.948 s (0.000 MBps)
+2015-12-10 13:16:40,332 ERROR compress_time = 43.531 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 78.948 s (0.000 MBps)
+2015-12-10 13:16:40,332 ERROR compress_time = 43.531 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 78.948 s (0.000 MBps)
+2015-12-10 13:16:40,332 ERROR compress_time = 43.531 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 78.948 s (0.000 MBps)
+2015-12-10 13:16:40,332 ERROR compress_time = 43.531 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 78.948 s (0.000 MBps)
+2015-12-10 13:16:40,332 ERROR compress_time = 43.531 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 78.948 s (0.000 MBps)
+2015-12-10 13:16:40,332 ERROR compress_time = 43.531 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 78.948 s (0.000 MBps)
+2015-12-10 13:16:40,332 ERROR compress_time = 43.531 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 78.948 s (0.000 MBps)
+2015-12-10 13:16:40,332 ERROR compress_time = 43.531 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 78.948 s (0.000 MBps)
+2015-12-10 13:16:40,332 ERROR compress_time = 43.531 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 78.948 s (0.000 MBps)
+2015-12-10 13:16:40,332 ERROR compress_time = 43.531 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 78.948 s (0.000 MBps)
+2015-12-10 13:16:40,332 ERROR compress_time = 43.531 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 78.948 s (0.000 MBps)
+2015-12-11 14:31:38,079 ERROR compress_time = 51.696 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 73.489 s (0.000 MBps)
+2015-12-11 14:31:38,079 ERROR compress_time = 51.696 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 73.489 s (0.000 MBps)
+2015-12-11 14:31:38,079 ERROR compress_time = 51.696 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 73.489 s (0.000 MBps)
+2015-12-11 14:31:38,079 ERROR compress_time = 51.696 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 73.489 s (0.000 MBps)
+2015-12-11 14:31:38,079 ERROR compress_time = 51.696 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 73.489 s (0.000 MBps)
+2015-12-11 14:31:38,079 ERROR compress_time = 51.696 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 73.489 s (0.000 MBps)
+2015-12-11 14:31:38,079 ERROR compress_time = 51.696 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 73.489 s (0.000 MBps)
+2015-12-11 14:31:38,079 ERROR compress_time = 51.696 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 73.489 s (0.000 MBps)
+2015-12-11 14:31:38,079 ERROR compress_time = 51.696 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 73.489 s (0.000 MBps)
+2015-12-11 14:31:38,079 ERROR compress_time = 51.696 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 73.489 s (0.000 MBps)
+2015-12-11 14:31:38,079 ERROR compress_time = 51.696 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 73.489 s (0.000 MBps)
+2015-12-11 14:31:38,079 ERROR compress_time = 51.696 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 73.489 s (0.000 MBps)
+2015-12-11 14:31:38,079 ERROR compress_time = 51.696 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 73.489 s (0.000 MBps)
+2015-12-11 14:31:38,079 ERROR compress_time = 51.696 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 73.489 s (0.000 MBps)
+2015-12-11 14:31:38,079 ERROR compress_time = 51.696 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 73.489 s (0.000 MBps)
+2015-12-11 18:04:33,670 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 26.155 s (0.000 MBps)
+2015-12-11 18:04:33,670 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 26.155 s (0.000 MBps)
+2015-12-11 18:04:33,670 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 26.155 s (0.000 MBps)
+2015-12-11 18:04:33,670 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 26.155 s (0.000 MBps)
+2015-12-11 18:04:33,670 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 26.155 s (0.000 MBps)
+2015-12-11 18:04:33,670 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 26.155 s (0.000 MBps)
+2015-12-11 18:04:33,670 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 26.155 s (0.000 MBps)
+2015-12-11 18:04:33,670 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 26.155 s (0.000 MBps)
+2015-12-11 18:04:33,670 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 26.155 s (0.000 MBps)
+2015-12-11 18:04:33,670 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 26.155 s (0.000 MBps)
+2015-12-11 18:04:33,670 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 26.155 s (0.000 MBps)
+2015-12-11 18:04:33,670 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 26.155 s (0.000 MBps)
+2015-12-11 18:04:33,670 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 26.155 s (0.000 MBps)
+2015-12-11 18:04:33,670 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 26.155 s (0.000 MBps)
+2015-12-11 18:04:33,670 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 6 ,concurrency = 4 ,Finished uploading 0.000M in 26.155 s (0.000 MBps)
+2015-12-11 18:09:11,609 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 0.000M in 37.854 s (0.000 MBps)
+2015-12-11 18:09:11,609 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 0.000M in 37.854 s (0.000 MBps)
+2015-12-11 18:09:11,609 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 0.000M in 37.854 s (0.000 MBps)
+2015-12-11 18:09:11,609 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 0.000M in 37.854 s (0.000 MBps)
+2015-12-11 18:09:11,609 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 0.000M in 37.854 s (0.000 MBps)
+2015-12-11 18:09:11,609 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 0.000M in 37.854 s (0.000 MBps)
+2015-12-11 18:09:11,609 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 0.000M in 37.854 s (0.000 MBps)
+2015-12-11 18:09:11,609 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 0.000M in 37.854 s (0.000 MBps)
+2015-12-11 18:09:11,609 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 0.000M in 37.854 s (0.000 MBps)
+2015-12-11 18:09:11,609 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 0.000M in 37.854 s (0.000 MBps)
+2015-12-11 18:09:11,609 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 0.000M in 37.854 s (0.000 MBps)
+2015-12-11 18:09:11,609 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 0.000M in 37.854 s (0.000 MBps)
+2015-12-11 18:09:11,609 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 0.000M in 37.854 s (0.000 MBps)
+2015-12-11 18:09:11,609 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 0.000M in 37.854 s (0.000 MBps)
+2015-12-11 18:09:11,609 ERROR compress_time = 0.000 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 0.000M in 37.854 s (0.000 MBps)
+2015-12-11 19:57:44,156 ERROR compress_time = 51.805 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 350.000M in 80.296 s (4.359 MBps)
+2015-12-11 19:57:44,156 ERROR compress_time = 51.805 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 350.000M in 80.296 s (4.359 MBps)
+2015-12-11 19:57:44,156 ERROR compress_time = 51.805 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 350.000M in 80.296 s (4.359 MBps)
+2015-12-11 19:57:44,156 ERROR compress_time = 51.805 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 350.000M in 80.296 s (4.359 MBps)
+2015-12-11 19:57:44,156 ERROR compress_time = 51.805 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 350.000M in 80.296 s (4.359 MBps)
+2015-12-11 19:57:44,156 ERROR compress_time = 51.805 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 350.000M in 80.296 s (4.359 MBps)
+2015-12-11 19:57:44,156 ERROR compress_time = 51.805 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 350.000M in 80.296 s (4.359 MBps)
+2015-12-11 19:57:44,156 ERROR compress_time = 51.805 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 350.000M in 80.296 s (4.359 MBps)
+2015-12-11 19:57:44,156 ERROR compress_time = 51.805 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 350.000M in 80.296 s (4.359 MBps)
+2015-12-11 19:57:44,156 ERROR compress_time = 51.805 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 350.000M in 80.296 s (4.359 MBps)
+2015-12-11 19:57:44,156 ERROR compress_time = 51.805 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 350.000M in 80.296 s (4.359 MBps)
+2015-12-11 19:57:44,156 ERROR compress_time = 51.805 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 350.000M in 80.296 s (4.359 MBps)
+2015-12-11 19:57:44,156 ERROR compress_time = 51.805 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 350.000M in 80.296 s (4.359 MBps)
+2015-12-11 19:57:44,156 ERROR compress_time = 51.805 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 350.000M in 80.296 s (4.359 MBps)
+2015-12-11 19:57:44,156 ERROR compress_time = 51.805 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 4 ,Finished uploading 350.000M in 80.296 s (4.359 MBps)
+2015-12-12 15:58:07,118 ERROR compress_time = 65.910 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 5 ,Finished uploading 300.000M in 89.520 s (3.351 MBps)
+2015-12-12 15:58:07,118 ERROR compress_time = 65.910 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 5 ,Finished uploading 300.000M in 89.520 s (3.351 MBps)
+2015-12-12 15:58:07,118 ERROR compress_time = 65.910 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 5 ,Finished uploading 300.000M in 89.520 s (3.351 MBps)
+2015-12-12 15:58:07,118 ERROR compress_time = 65.910 ,File /Users/ytlin/Desktop/java1.8/ part size = 5 ,concurrency = 5 ,Finished uploading 300.000M in 89.520 s (3.351 MBps)
