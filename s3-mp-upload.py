@@ -5,22 +5,26 @@ import errno
 from cStringIO import StringIO
 import logging
 from math import ceil
-import multiprocessing
+from multiprocessing import Process, Value, Array
 import multiprocessing.pool
 import time
 import urlparse
 from timeout import timeout
 import boto
 from boto.s3.connection import S3Connection
+from random  import randint
 import random
 import sys, traceback
 import signal
 import compress
 from functools import partial
 import subprocess
-import getfile
-from threading import Thread,Lock
+import shutil
 
+import getfile
+from threading import Thread,Lock,currentThread
+from traffic import initargs
+import numpy
 parser = argparse.ArgumentParser(description="Transfer large files to S3",
         prog="s3-mp-upload")
 parser.add_argument("filepath",  help="The file to transfer")
@@ -54,10 +58,10 @@ class NoDaemonProcessPool(multiprocessing.pool.Pool):
 	Process = NoDaemonProcess
 
 def handler(signum, frame):
-	raise Exception("failure occur!!")
+	raise UserWarning("failure occur!!")
 sp=0
-Threadnum = None
-
+status_list=None
+New_Threadnum=0
 #@timeout(sp/25, os.strerror(errno.ETIMEDOUT))
 #@timeout(5, os.strerror(errno.ETIMEDOUT))
 def do_part_upload(args,current_tries=1):
@@ -119,20 +123,15 @@ def do_part_upload(args,current_tries=1):
 		return
 
 
-def main(uploadFileNames,lock,filepath, dest, num_processes=2, split=50, force=False, reduced_redundancy=False, secure=False, max_tries=5, simulate=0,Threshold=0,get=False):
-    """
-    global Threadnum
-    test = random.randint(4,8)
-    print  "Total = "  + str(Threadnum) +" threads "+ uploadFileNames + "  how much thread =" +str(num_processes) +" sleep time ="+str(test)
-    time.sleep(test)  
-    lock.acquire()
-    global Threadnum 
-    Threadnum +=num_processes
-    print uploadFileNames +" add back now is   " + str(Threadnum)
-    lock.release()
-    return uploadFileNames
-    """
+def Thread_Upload(FileList,lock,filepath, dest, num_processes=2, split=50, force=False, reduced_redundancy=False, secure=False, max_tries=5, simulate=0,Threshold=0,get=False):
+
+    #this is work  print currentThread().getName()
     # Check that dest is a valid S3 url
+    uploadFileNames = currentThread().getName()
+    global status_list
+    lock.acquire()
+    status_list[FileList.index(uploadFileNames)] = 'upload'
+    lock.release()
     split_rs = urlparse.urlsplit(dest)
     filepath = uploadFileNames
     src = open(filepath, "rw+")
@@ -140,8 +139,6 @@ def main(uploadFileNames,lock,filepath, dest, num_processes=2, split=50, force=F
     filepath = uploadFileNames.replace(os.getcwd(),"")
     print filepath
 
-    if split_rs.scheme != "s3":
-        raise ValueError("'%s' is not an S3 url" % dest)
     global sp
     if split>160:
        sp=split
@@ -151,15 +148,14 @@ def main(uploadFileNames,lock,filepath, dest, num_processes=2, split=50, force=F
 
     s3 = S3Connection()
     s3.is_secure = secure
-    bucket = s3.get_bucket(split_rs.netloc)
-    if bucket == None:
-        raise ValueError("'%s' is not a valid bucket" % split_rs.netloc)
+
     key = bucket.get_key(filepath)
     # See if we're overwriting an existing key
     if key is not None:
         if not force:
             raise ValueError("'%s' already exists. Specify -f to overwrite it" % dest)
     # Determine the splits
+
     part_size = max(5*1024*1024, 1024*1024*split)
     src.seek(0,2)
     size = src.tell()
@@ -167,37 +163,34 @@ def main(uploadFileNames,lock,filepath, dest, num_processes=2, split=50, force=F
 
     # If file is less than 5M, just upload it directly
     if size < split*2*1024*1024:
-	
 	global Threadnum
-	if num_processes !=1:
-		lock.acquire()
-		Threadnum +=num_processes -1
-		print uploadFileNames +" add " + str(num_processes -1)+  " because single part , now is   " + str(Threadnum)
-		lock.release()
-
-        src.seek(0)
-        t1 = time.time()
-        k = boto.s3.key.Key(bucket,filepath)
-        k.set_contents_from_file(src)
-        t2 = time.time() - t1
-        s = size/1024./1024.
+	print src.name +'  single use ' +str (num_processes)
+	src.seek(0)
+	t1 = time.time()
+	k = boto.s3.key.Key(bucket,filepath)
+	k.set_contents_from_file(src)
+	t2 = time.time() - t1
+	s = size/1024./1024.
+	'''
 	hdlr = logging.FileHandler("bigmultipart.log")
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
-        hdlr.setFormatter(formatter)
-        logger.addHandler(hdlr)
-	logger.info("part size = %d ,concurrency = %d ,Finished uploading %0.3f M in %0.3f s (%0.3f MBps)" % (split ,num_processes, s, t2, s/t2))
+	formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+	hdlr.setFormatter(formatter)
+	#logger.addHandler(hdlr)
+	#logger.info("part size = %d ,concurrency = %d ,Finished uploading %0.3f M in %0.3f s (%0.3f MBps)" % (split ,num_processes, s, t2, s/t2))
+	'''
 
-	print  "Total = "  + str(Threadnum) +" threads "+ uploadFileNames + "  how much thread =" +str(num_processes) 
 	lock.acquire()
-	Threadnum +=1
+	status_list[FileList.index(uploadFileNames)]=-1
+	print src.name +" finish  "+str (status_list)
+	critical_threadnum(1)
 	print "finish " + uploadFileNames +" add back now is   " + str(Threadnum)
 	lock.release()
-	return uploadFileNames
-
+	#os.remove(src.name)
+	return
 
     # Create the multi-part upload object
     mpu = bucket.initiate_multipart_upload(filepath, reduced_redundancy=reduced_redundancy)
-    logger.info("Initialized upload: %s" % mpu.id)
+    #logger.info("Initialized upload: %s" % mpu.id)
     
     # Generate arguments for invocations of do_part_upload
     def gen_args(x, fold_last, upload_list):
@@ -216,37 +209,45 @@ def main(uploadFileNames,lock,filepath, dest, num_processes=2, split=50, force=F
     # Do the thing
     t1 = time.time()
     def master_progress(mpu,num_processes,bucket,upload_list):
+	    print "fucke "
 	    x=0
 	    while True:
 		try:
 			if x!=num_parts:
-				print "Hi"
+				print "mpu.id = "+str(mpu.id) +"  is "+src.name +"  use " +str(num_processes)
+#				status_list[FileList.index(uploadFileNames)]=mpu.id	
 				pool = NoDaemonProcessPool(processes=num_processes)
 				pool.map_async(do_part_upload, gen_args(x,fold_last,upload_list)).get(99999999)
+				print "I am " +str(pool)
                         src.close()
-	#		print "finish" +str(mpu.get_all_parts())
+			
                         mpu.complete_upload()
+			print "src name " +src.name
+			#os.remove(src.name)
                         t2 = time.time() - t1
                         s = size/1024./1024.
 			#print str(bucket) + str(s) + str(t2) + str(s/t2)
                         logger.info("bucket %s part size = %d ,concurrency = %d ,Finished uploading %0.3fM in %0.3f s (%0.3f MBps)" %  (bucket,split ,num_processes, s, t2, s/t2))
 			global Threadnum
-			print  "Total = "  + str(Threadnum) +" threads "+ uploadFileNames + "  how much thread =" +str(num_processes) 
 			lock.acquire()
-			Threadnum +=num_processes
+			status_list[FileList.index(uploadFileNames)]=-1
+			print src.name +" finish  "+str (status_list)
+			critical_threadnum(num_processes)
 			print uploadFileNames +" add back now is   " + str(Threadnum)
 			lock.release()
+			pool.terminate()
                         break
 		except KeyboardInterrupt:
 			logger.warn("Received KeyboardInterrupt, canceling upload")
 			pool.terminate()
 			mpu.cancel_upload()
+
 			break
 		except Exception, err:
 			logger.error("Encountered an error, canceling upload aaaaaaaaaaaa")
 			print src.name
 			logger.error(err)
-			pool.terminate()
+			#pool.terminate()
 			traceback.print_exc()
 			print mpu.get_all_parts()
 			x= len(mpu.get_all_parts())
@@ -260,16 +261,11 @@ def main(uploadFileNames,lock,filepath, dest, num_processes=2, split=50, force=F
 			if simulate!=0:
 				#signal.alarm(int(random.expovariate(1.0/120.0)))
 				signal.alarm(7)
-			#break
+			break
 
     t1 = time.time()
-    #signal.signal(signal.SIGALRM, handler)
-    #print mpu.get_all_parts()
-    print simulate
-    if simulate!=0:
-    	signal.alarm(int(random.expovariate(1.0/simulate)))
-   #    signal.alarm(10)
     master_progress(mpu,num_processes,bucket,upload_list)
+
 def getBandwidth():
 	proc = subprocess.Popen('speedtest-cli', stdout=subprocess.PIPE)
 
@@ -277,99 +273,209 @@ def getBandwidth():
 	print "bandwidth = "+ strlist[len(strlist)-2]
 	return  strlist[len(strlist)-2]
 
-def gen_argsfor(x, fold_last, upload_list):
-	return 
-def FIFO():
-	return 
+def critical_threadnum(addback):
+	global Threadnum
+	global New_Threadnum
+	NewValue = New_Threadnum
+        if Threadnum +addback > NewValue:
+		Threadnum = NewValue
+        else:
+		Threadnum +=addback
+
+def FIFO(arg_dict,uploadFileNames,bandwidth):
+    global status_list
+    global Threadnum 
+    lock = Lock()
+    i = 0
+    status_list = list((i)for i in range(len(uploadFileNames)))
+    toThread = arg_dict.copy()
+    change_thread  = Thread(name='ChangeResource',target=NewResourceSize,args=(Threadnum,lock,bandwidth))
+    change_thread.daemon = True
+	
+    change_thread.start() 
+#    change_thread.terminate()
+
+#    if arg_dict['simulate']!=0:
+#	    signal.alarm(int(random.expovariate(1.0/simulate)))
+    signal.alarm(5)
+    signal.signal(signal.SIGALRM, handler)
+    Thread_list=[]
+    while True:
+	    try:
+		    if status_list.count(-1)==len(uploadFileNames):
+			    break
+		    if i == len(uploadFileNames):
+			    i=0
+			    while status_list[i]!=i:
+				    if i == len(uploadFileNames)-1:
+					    i=0
+				    else:
+					    i+=1
+		    if Threadnum >0 and status_list[i]==i:
+			    toThread['filepath'] ,toThread['num_processes'] = FIFOargs(uploadFileNames,i,arg_dict['split'],arg_dict['num_processes']
+			    )
+			    if Threadnum != 0  and Threadnum < toThread['num_processes']:
+				    i+=1
+				    if status_list[i]==i:#status_list[i]!=-1 or status_list[i]!='upload':
+					    continue
+			    func = partial(Thread_Upload,**toThread)
+			    a = Thread(name=uploadFileNames[i],target=func,args=(uploadFileNames,lock))
+			    a.start()
+			    Thread_list.append(a)
+			    Threadnum -= toThread['num_processes']
+			    i+=1
+		    else:
+			    i+=1
+	    except IndexError:
+		pass
+	    except KeyboardInterrupt:
+		print "FIFO ^c"
+		break
+	    except UserWarning:
+		print Thread_list
+		signal.alarm(5)
+
+def FIFOargs(uploadFileNames,now,split,inputProcessNum):
+	sizeinMB = os.path.getsize(uploadFileNames[now])/1024./1024.
+	num_process = int(ceil(sizeinMB/split))
+	if inputProcessNum < num_process:
+		num_process = inputProcessNum
+#	print uploadFileNames[now],num_process
+	return uploadFileNames[now],num_process
+def NewResourceSize(originThreadnum,lock,bandwidth):
+	global status_list
+	global New_Threadnum
+	global Threadnum
+	New_Threadnum = Threadnum
+	last_Threadnum = originThreadnum
+	last_throughput = bandwidth
+	counter = 0
+	time.sleep(4)
+	history_throughput = []
+	STD = 50
+	while status_list.count(-1)!=len(uploadFileNames):
+		try:
+			if STD>2:
+				Unstable = True
+			else:
+				print "stable throughput =  "+str (numpy.average(history_throughput))
+				Unstable = False
+				break
+			if Unstable:
+				now_throughput = initargs(5,)
+				now_throughput = now_throughput/1024./1024.
+				if len(history_throughput)>4 :
+					print "WTFFFF  " +str(numpy.std(history_throughput))
+					STD = float(numpy.std(history_throughput))
+
+					print "standard XXXXX " + str(STD)
+					history_throughput.pop()
+					history_throughput.insert(0,now_throughput)
+				else:
+					history_throughput.insert(0,now_throughput)
+
+				if now_throughput < last_throughput/2 or counter>3:
+					print str(last_throughput) + " is higher than "+str(now_throughput)+" ,increase resource "
+					
+					New_Threadnum +=New_Threadnum
+					last_throughput = now_throughput
+					counter = 0
+				else:
+					
+					counter+=1
+				if New_Threadnum > last_Threadnum :
+					lock.acquire()
+					Threadnum +=New_Threadnum-last_Threadnum
+					lock.release()
+					print "resource increase "+str(New_Threadnum-last_Threadnum)+" now is " +str(Threadnum)
+					last_Threadnum = New_Threadnum
+					print "change to New_Threadnum " +str(New_Threadnum) 	
+		except KeyboardInterrupt:
+			print "NewResource ^c"
+			break
+	print "stop please"
+
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    #logging.basicConfig(level=logging.INFO)
     args = parser.parse_args()
     arg_dict = vars(args)
-    print arg_dict['get']
+    split_rs = urlparse.urlsplit(arg_dict['dest'])
+    if split_rs.scheme != "s3":
+	    raise ValueError("is not an S3 url")
+    s3 = S3Connection()
+    bucket = s3.get_bucket(split_rs.netloc)
+    if bucket == None:
+	    raise ValueError("'%s' is not a valid bucket" % split_rs.netloc)
+
     if arg_dict['get']:
 	    getfile.GetTheFile(arg_dict['filepath'])
     else:
-	    logger.debug("CLI args: %s" % args)
 	    hdlr = logging.FileHandler("bigmultipart.log")
 	    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 	    hdlr.setFormatter(formatter)
 	    logger.addHandler(hdlr)
 	    logger.setLevel(logging.ERROR)
-	    bandwidth = float(getBandwidth())
-	    
-	    print "bandwidth = "+ str(bandwidth)
+	   	
+	   # bandwidth = float(Thread(name='ChangeResource',target=getBandwidth,args=('something',)))	    
+	   # print "bandwidth = "+ str(bandwidth)
 
-	    split_rs = urlparse.urlsplit(arg_dict['dest'])
 	    filepath = arg_dict['filepath']
 	    print arg_dict
+	    # it work for du -sh *,get the size
+	    print filepath
+	    proc = subprocess.Popen(['du','-sk',filepath], stdout=subprocess.PIPE)
+	    strlist = proc.stdout.read().split("\t")
+	    print 'origin size is ' +str(strlist[0])
+	    Uploadsize = float(strlist[0])
+
 	    uploadFileNames = []
-	    new_path = os.getcwd()+split_rs.path
+	    Upload_dir_Name = os.getcwd()+split_rs.path
 	    t1 = time.time()
 
 	    if os.path.isfile(filepath):
-		new_path = compress.CompressBigFile(filepath,split_rs.path,filepath,new_path,False)
-		uploadFileNames.append(new_path)
-		s += os.path.getsize(new_path)
+		Upload_dir_Name ,nocompression= compress.CompressBigFile(filepath,split_rs.path,filepath,Upload_dir_Name,False)
+		uploadFileNames.append(Upload_dir_Name)
+		afterCompressSize = 0
+		Uploadsize = os.path.getsize(Upload_dir_Name)/1024.
 	    else:
-		GZfile,METAfile,Uploadsize = compress.Compression(filepath,split_rs.path,arg_dict['Threshold'])
+		GZfile,METAfile,afterCompressSize = compress.Compression(filepath,split_rs.path,arg_dict['Threshold'])
 		uploadFileNames = GZfile+METAfile
-	    """
-	    print int(bandwidth/int(arg_dict['split']))
-	    uploadFileNames = ['/Users/ytlin/GitHub/storage/1g/1_data.gz', '/Users/ytlin/GitHub/storage/1g/2_data.gz', '/Users/ytlin/GitHub/storage/1g/3_data.gz', '/Users/ytlin/GitHub/storage/1g/4_data.gz', '/Users/ytlin/GitHub/storage/1g/5_data.gz', '/Users/ytlin/GitHub/storage/1g/6_data.gz', '/Users/ytlin/GitHub/storage/1g/7_data.gz', '/Users/ytlin/GitHub/storage/1g/8_data.gz', '/Users/ytlin/GitHub/storage/1g/1_data.meta', '/Users/ytlin/GitHub/storage/1g/2_data.meta', '/Users/ytlin/GitHub/storage/1g/3_data.meta', '/Users/ytlin/GitHub/storage/1g/4_data.meta', '/Users/ytlin/GitHub/storage/1g/5_data.meta', '/Users/ytlin/GitHub/storage/1g/6_data.meta', '/Users/ytlin/GitHub/storage/1g/7_data.meta', '/Users/ytlin/GitHub/storage/1g/8_data.meta']
-	    """
+	
+	    '''
+
+	   # print int(int(bandwidth)/int(arg_dict['split']))
+	    uploadFileNames = ['/Users/ytlin/GitHub/storage/1g/1_data.gz', '/Users/ytlin/GitHub/storage/1g/2_data.gz', '/Users/ytlin/GitHub/storage/1g/3_data.gz', '/Users/ytlin/GitHub/storage/1g/4_data.gz', '/Users/ytlin/GitHub/storage/1g/1_data.meta', '/Users/ytlin/GitHub/storage/1g/2_data.meta', '/Users/ytlin/GitHub/storage/1g/3_data.meta', '/Users/ytlin/GitHub/storage/1g/4_data.meta']
+	    
+
+
+
+	    '''
 	    t3 = time.time() - t1
 	    global Threadnum 
-	    Threadnum =  int(bandwidth/int(arg_dict['split']))
-	    lock = Lock() 
-	    i=0
-	
-	    store = arg_dict['num_processes']
-	    
-	    proc = subprocess.Popen(['du','-sh',filepath], stdout=subprocess.PIPE)
-            strlist = proc.stdout.read().split("\t")
-            print strlist[0]
-	    Thread_list = []	
-	    while True:
-		    if Threadnum >0 and i != len(uploadFileNames)-1:
-			    if arg_dict['num_processes'] > Threadnum and Threadnum != 0:
-				    arg_dict['num_processes'] = Threadnum
-	#		    else:
-	#		    	    pass
-			    func = partial(main,**arg_dict)
-			    a = Thread(target=func,args=(uploadFileNames[i],lock))
-			    a.setName(uploadFileNames[i])
-			    a.start()
-			    Thread_list.append(a)
-			    i+=1
-	#		    if not a.isAlive():
-	#		    	print a.getName()
-			    Threadnum -= arg_dict['num_processes']
-			    arg_dict['num_processes'] = store
-			    print Threadnum 	 
-		    for thread in Thread_list:
-			    if not thread.isAlive():
-				    Thread_list.remove(thread)
-		    if not Thread_list:
-			    print "breadk ????"
-			    break
-		    """
-		    if i == len(uploadFileNames)-1 :
-			    print "breadk ????"
-			    break
-		    """
-	    """
-	    Mainpool = NoDaemonProcessPool(processes=2)
-	    func = partial(main,**arg_dict)
-	    Mainpool.map_async(func,uploadFileNames).get(99999999)
-	    """
+	    bandwidth = 20/8
+	    Threadnum =  max( 10 ,int(bandwidth/int(arg_dict['split'])))
+#	    Threadnum = int(20/int(arg_dict['split']))
+#	    Threadnum = 10
+	    print Threadnum
+#	    uploadDict = dict((Filepath ,'new') for Filepath in uploadFileNames)
+#	    store = arg_dict['num_processes']
+
+
+
+	    print uploadFileNames 
+	    FIFO(arg_dict,uploadFileNames,bandwidth)
+
 	    t2 = time.time() - t1
 	    print "total time= "+str(t2)
-	    s3 = S3Connection()
-	    bucket = s3.get_bucket(split_rs.netloc)
-	    Uploadsize = Uploadsize/1024/1024
-	    logger.error("compress_time = %0.3f ,File %s part size = %d ,concurrency = %d ,Finished uploading %0.3fM in %0.3f s (%0.3f MBps)" %  (t3,arg_dict['filepath'],arg_dict['split'] ,arg_dict['num_processes'], Uploadsize, t2, Uploadsize/t2))
+	    Uploadsize = Uploadsize/1024.
+	    afterCompressSize = afterCompressSize/1024./1024.
+	    rate = (Uploadsize -afterCompressSize) /t3
+	    if os.path.isfile(filepath) and nocompression:
+		 logger.error("Nocompression  File %s part size = %d ,concurrency = %d ,upload (ori)%0.2fM in %0.2f s (%0.2f MBps)" %  (arg_dict['filepath'],arg_dict['split'] ,arg_dict['num_processes'], Uploadsize, t2, Uploadsize/t2))
+	    else:
+	   	 shutil.rmtree(Upload_dir_Name)
+		 logger.error("compress = %0.2f ,reduce rate %0.2fM  File %s part size = %d ,concurrency = %d ,upload (ori)%0.2fM in %0.2f s (%0.2f MBps)" %  (t3,rate,arg_dict['filepath'],arg_dict['split'] ,arg_dict['num_processes'], Uploadsize, t2, Uploadsize/t2))
 	    print "finish"
 	    for mp in bucket.list_multipart_uploads():
 		    mp.cancel_upload()
-#	    Mainpool.terminate()
 	   # main(**arg_dict)

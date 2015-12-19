@@ -15,6 +15,8 @@ def Combine_files(combine_list,sourceDir,WaitingToUpload,FileCounter):
 	CombinedFileName = sourceDir.replace(sourceDir,WaitingToUpload)+str(FileCounter)+"_data"
 	with open(CombinedFileName, 'wb') as outfile:
 		for fname in combine_list:
+#			if 'fffff.tar.gz' in fname:
+#				print 'WTF in ' +str(FileCounter)
 			with open(fname,'r') as infile:
 				outfile.write(infile.read())
 #				os.remove(fname)
@@ -22,9 +24,8 @@ def Combine_files(combine_list,sourceDir,WaitingToUpload,FileCounter):
 
 def Metadata(MetaFileInfo,MetaSizeInfo,NewFileName):
 	MetaName = NewFileName+".meta"
-	with open(MetaName, 'w') as f:
-		pickle.dump(MetaFileInfo, f)
-		pickle.dump(MetaSizeInfo, f)
+	with open(MetaName, 'wb') as f:
+		pickle.dump(MetaFileInfo+MetaSizeInfo, f)
 	return NewFileName
 
 def BigFileMetadata(Metafile,WaitingToUpload):
@@ -54,7 +55,7 @@ def Compress_all_files(Dirpath):
         size_list =[]
 	for (sourceDir, dirname, filename) in os.walk(Dirpath):
                 for f in filename:
-			if ".meta" not in f:
+			if ".meta" not in f :
 				fileindir = os.path.join(sourceDir, f)
 				CompressedFile = fileindir+".gz"
 				CompressfilesInDir.append(CompressedFile)
@@ -67,9 +68,17 @@ def Compress_all_files(Dirpath):
 	return CompressfilesInDir #,size_list
 
 def CompressBigFile(BigFilePath,S3KeyName,rootDir,WaitingToUpload,InDir):
-
-	if  str(magic.from_file(BigFilePath,mime=True))=="video/mp4":
-		return  BigFilePath
+	Formatlist = ['compress','video','audio','jpeg','mpeg','gzip','zip']
+	print str(magic.from_file(BigFilePath,mime=True))
+	for i in Formatlist:
+		if  i in str(magic.from_file(BigFilePath,mime=True)):
+			if InDir:
+				print rootDir
+				print S3KeyName
+				print str(i)+ " WTF  "  + BigFilePath.replace(rootDir,S3KeyName)
+				return os.path.abspath(BigFilePath),BigFilePath.replace(rootDir,S3KeyName)
+			else:
+				return os.path.abspath(BigFilePath),True
 	CompressedFile = BigFilePath.replace(rootDir, WaitingToUpload) +".gz"
 	CompressedMetaPath = BigFilePath.replace(rootDir,S3KeyName)+".gz"
 	#print os.path.abspath(CompressedFile)
@@ -79,7 +88,7 @@ def CompressBigFile(BigFilePath,S3KeyName,rootDir,WaitingToUpload,InDir):
 	if InDir:
 		return os.path.abspath(CompressedFile),CompressedMetaPath
 	else:
-		return os.path.abspath(CompressedFile)
+		return os.path.abspath(CompressedFile),False
 
 
 def MakeDir(directory):
@@ -87,9 +96,6 @@ def MakeDir(directory):
 		    os.makedirs(directory)
 
 def Compression(rootDir,S3KeyName,Threshold):
-	destDir=''
-	bucket_name='asdf'
-	pairs = []
 	combine_list = []
 	BigFileList = []
 	UploadBigFileList = []
@@ -111,6 +117,7 @@ def Compression(rootDir,S3KeyName,Threshold):
 		    if  Combine_size < Threshold * MB:
 			    if os.path.getsize(sourcepath) > Threshold * MB:
 				#big file list
+				Uploadsize += os.path.getsize(sourcepath)
 				Newpath , Metapath = CompressBigFile(sourcepath,S3KeyName,sourceDir+'/',WaitingToUpload,True)
 				UploadBigFileList.append(Newpath)
 			        BigFileList.append(Metapath)
@@ -122,8 +129,9 @@ def Compression(rootDir,S3KeyName,Threshold):
 				WriteToMeta_list.append(sourcepath.replace(rootDir,S3KeyName))
 				size_list.append(Combine_size)
 				#print total_sizste
-		    else: 
+		    else:
 			FileCounter = FileCounter +1
+			print FileCounter
 			CombinedFileName = Combine_files(combine_list,rootDir,WaitingToUpload,FileCounter)
 			Newpath = os.path.abspath(Metadata(WriteToMeta_list,size_list,CombinedFileName))
 			NewFileName.append(Newpath)
@@ -133,15 +141,22 @@ def Compression(rootDir,S3KeyName,Threshold):
 			WriteToMeta_list=[]
 			size_list=[]
 	#break the for loop ,combined remaining files
-	FileCounter = FileCounter +1
-	CombinedFileName = Combine_files(combine_list,rootDir,WaitingToUpload,FileCounter)
-	Newpath = os.path.abspath(Metadata(WriteToMeta_list,size_list,CombinedFileName))
-	NewFileName.append(Newpath)	
+	if Combine_size >0:
+		Uploadsize += Combine_size
+		FileCounter = FileCounter +1
+
+		CombinedFileName = Combine_files(combine_list,rootDir,WaitingToUpload,FileCounter)
+		Newpath = os.path.abspath(Metadata(WriteToMeta_list,size_list,CombinedFileName))
+		NewFileName.append(Newpath)	
+
 	if BigFileList: 
 		BigFileMetadata(BigFileList,WaitingToUpload)
 	Compressfilelist = Compress_all_files(WaitingToUpload)
 	Metadatalist     = Metadata_list(WaitingToUpload)
-	return Compressfilelist,Metadatalist ,Uploadsize
+	b=0
+	for f in UploadBigFileList+Compressfilelist:
+		b+=os.path.getsize(f)
+	return UploadBigFileList+Compressfilelist,Metadatalist ,b
 	'''
 	Combine_files(Compressfilelist,rootDir,WaitingToUpload,"upload")
 	print combine_size_list
