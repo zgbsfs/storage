@@ -60,9 +60,9 @@ logger = logging.getLogger("s3-mp-upload")
 def handler(signum, frame):
 	raise UserWarning("failure occur!!")
 sp=0
-status_list=None
-New_Threadnum=0
-timeout_event=None
+#status_list=None
+#New_Threadnum=0
+#timeout_event=None
 #@timeout(sp/25, os.strerror(errno.ETIMEDOUT))
 #@timeout(5, os.strerror(errno.ETIMEDOUT))
 def do_part_upload(args,current_tries=1):
@@ -125,14 +125,15 @@ def do_part_upload(args,current_tries=1):
 		return
 
 
-def Thread_Upload(uploadFileNames,FileList,status_list,lock,filepath, dest, num_processes=2, split=50, force=False, reduced_redundancy=False, secure=False, max_tries=5, simulate=0,Threshold=0,get=False):
+def Thread_Upload(Retransimit,New_Threadnum,Threadnum,uploadFileNames,FileList,status_list,lock,filepath, dest, num_processes=2, split=50, force=False, reduced_redundancy=False, secure=False, max_tries=5, simulate=0,Threshold=0,get=False):
 
     #this is work  print currentThread().getName()
     # Check that dest is a valid S3 url
-    lock.acquire()
-    status_list[FileList.index(uploadFileNames)] = 'upload'
-    lock.release()
-    print "inthread "  + status_list[FileList.index(uploadFileNames)]
+    if not Retransimit:
+	    lock.acquire()
+	    status_list[FileList.index(uploadFileNames)] = 'upload'
+	    lock.release()
+	    print "inthread "  + status_list[FileList.index(uploadFileNames)]
     split_rs = urlparse.urlsplit(dest)
     filepath = uploadFileNames
     src = open(filepath, "rw+")
@@ -165,7 +166,6 @@ def Thread_Upload(uploadFileNames,FileList,status_list,lock,filepath, dest, num_
 
     # If file is less than 5M, just upload it directly
     if size < split*2*1024*1024:
-	global Threadnum
 	print src.name +'  single use ' +str (num_processes)
 	src.seek(0)
 	t1 = time.time()
@@ -184,14 +184,19 @@ def Thread_Upload(uploadFileNames,FileList,status_list,lock,filepath, dest, num_
 	lock.acquire()
 	status_list[FileList.index(uploadFileNames)]=-1
 	print src.name +" finish  "+str (status_list)
-	critical_threadnum(1)
-	print "finish " + uploadFileNames +" add back now is   " + str(Threadnum)
+	critical_threadnum(New_Threadnum,Threadnum,num_processes)
+	print "finish " + uploadFileNames +" add back now is   " + str(Threadnum.value)
 	lock.release()
 	#os.remove(src.name)
 	return
-
-    # Create the multi-part upload object
-    mpu = bucket.initiate_multipart_upload(filepath, reduced_redundancy=reduced_redundancy)
+    if not Retransimit:
+        # Create the multi-part upload object
+        mpu = bucket.initiate_multipart_upload(filepath, reduced_redundancy=reduced_redundancy)
+    else:
+	for mp in bucket.list_multipart_uploads():
+            if mp.id == mpu_id:
+        	    mpu = mp
+	            break
     #logger.info("Initialized upload: %s" % mpu.id)
     
     # Generate arguments for invocations of do_part_upload
@@ -224,7 +229,7 @@ def Thread_Upload(uploadFileNames,FileList,status_list,lock,filepath, dest, num_
 			print "aaaaa"
 			if x!=num_parts:
 	#			print "mpu.id = "+str(mpu.id) +"  is "+src.name +"  use " +str(num_processes)
-				status_list[FileList.index(uploadFileNames)]=mpu.id	
+				status_list[FileList.index(uploadFileNames)]=mpu
 	#			print str(x) +" = master proce "  + status_list[FileList.index(uploadFileNames)]
 								
 				pool = Pool(processes=num_processes)
@@ -234,12 +239,11 @@ def Thread_Upload(uploadFileNames,FileList,status_list,lock,filepath, dest, num_
                         mpu.complete_upload()
 			print "mpu.complete src name " +src.name
 			#os.remove(src.name)
-			global Threadnum
 			lock.acquire()
 			status_list[FileList.index(uploadFileNames)]=-1
 			print src.name +" finish  "+str (status_list)
-			critical_threadnum(num_processes)
-			print uploadFileNames +" add back now is   " + str(Threadnum)
+			critical_threadnum(New_Threadnum,Threadnum,num_processes)
+			print uploadFileNames +" add back now is   " + str(Threadnum.value)
 			lock.release()
 			pool.terminate()
                         break
@@ -280,29 +284,27 @@ def getBandwidth():
 	print "bandwidth = "+ strlist[len(strlist)-2]
 	return  strlist[len(strlist)-2]
 
-def critical_threadnum(addback):
-	global Threadnum
-	global New_Threadnum
-	NewValue = New_Threadnum
-        if Threadnum +addback > NewValue:
-		Threadnum = NewValue
+def critical_threadnum(New_Threadnum,Threadnum,addback):
+	NewValue = New_Threadnum.value
+        if Threadnum.value +addback > NewValue:
+		Threadnum.value = NewValue
         else:
-		Threadnum +=addback
+		Threadnum.value += addback
 
-def FIFO(arg_dict,uploadFileNames,bandwidth):
+def FIFO(arg_dict,uploadFileNames,bandwidth,input_threadnum):
     manager = Manager()
 #    status_list = Array('i', range(len(uploadFileNames)))
     status_list = manager.list(range(len(uploadFileNames)))
-    global Threadnum 
+    Threadnum = Value('i', input_threadnum)
+    New_Threadnum = Value('i', input_threadnum)
+    print "wwwww   +" + str(status_list)
     lock = Lock()
     i = 0
     toThread = arg_dict.copy()
-    change_thread  = Process(name='ChangeResource',target=NewResourceSize,args=(Threadnum,lock,bandwidth,status_list))
+    change_thread  = Process(name='ChangeResource',target=NewResourceSize,args=(New_Threadnum,Threadnum,lock,bandwidth,status_list))
     change_thread.daemon = True
 	
     change_thread.start() 
-#    change_thread.terminate()
-
 #    if arg_dict['simulate']!=0:
 #	    signal.alarm(int(random.expovariate(1.0/simulate)))
     #signal.alarm(50)
@@ -310,19 +312,13 @@ def FIFO(arg_dict,uploadFileNames,bandwidth):
     Thread_list=[]
     Failure = 0
     dict_list = list((i)for i in range(len(uploadFileNames)))
-    while True:
+    Retransimit = False
+    print len(uploadFileNames)
+    while status_list.count(-1) != len(uploadFileNames):
 	    try:
-		    if status_list.count(-1)==len(uploadFileNames):
-			    change_thread.terminate()
-			    break
 		    if i == len(uploadFileNames):
 			    i=0
-			    while status_list[i]!=i:
-				    if i == len(uploadFileNames)-1:
-					    i=0
-				    else:
-					    i+=1
-		    if Threadnum >0 and status_list[i]==i :
+		    if Threadnum.value >0 and status_list[i]==i:
 			    print "e04    "+ str(status_list[i]) +"    "+str(i)
 			    print "one time "
 			    if dict_list[i]==i:
@@ -331,22 +327,24 @@ def FIFO(arg_dict,uploadFileNames,bandwidth):
 				    dict_list[i] = toThread
 			    configure = dict_list[i]
 				   
-			    if Threadnum != 0  and Threadnum < toThread['num_processes']:
+			    if Threadnum.value != 0  and Threadnum.value < toThread['num_processes']:
 				    i+=1
 				    if status_list[i]==i:#status_list[i]!=-1 or status_list[i]!='upload':
 					    continue
 			    func = partial(Thread_Upload,**configure)
-			    a = Process(name=uploadFileNames[i],target=func,args=(uploadFileNames[i],uploadFileNames,status_list,lock))
+			    a = Process(name=uploadFileNames[i],target=func,args=(Retransimit,New_Threadnum,Threadnum,uploadFileNames[i],uploadFileNames,status_list,lock))
 			    a.daemon =False
 			    a.start()
-			    Threadnum -= toThread['num_processes']
+			    Threadnum.value -=  toThread['num_processes']
+			    time.sleep(1) 
 			    i+=1
 		    else:
 			    i+=1
 		
 	    except IndexError:
-		pass
+		continue
 	    except KeyboardInterrupt:
+		traceback.print_exc()
 		print "FIFO ^c"
 		break
 	    except UserWarning:
@@ -357,14 +355,15 @@ def FIFO(arg_dict,uploadFileNames,bandwidth):
 		for i in range(len(status_list)):
                         if status_list[i]=='upload':
                                 status_list[i]=i
-		Threadnum = 10	
+		Threadnum.value = 10	
+		Retransimit = True
 		print "Dont plerase" + str(active_children())
 		print status_list
 		#while active_children():
 		#	print "have" +str(active_children())
 		#	task_process.terminate()
 		#signal.alarm(50)
-
+    print "stoooooooooooop"
 
 def FIFOargs(uploadFileNames,now,split,inputProcessNum):
 	sizeinMB = os.path.getsize(uploadFileNames[now])/1024./1024.
@@ -373,11 +372,9 @@ def FIFOargs(uploadFileNames,now,split,inputProcessNum):
 		num_process = inputProcessNum
 #	print uploadFileNames[now],num_process
 	return uploadFileNames[now],num_process
-def NewResourceSize(originThreadnum,lock,bandwidth,status_list):
-	global New_Threadnum
-	global Threadnum
-	New_Threadnum = Threadnum
-	last_Threadnum = originThreadnum
+def NewResourceSize(New_Threadnum,Threadnum,lock,bandwidth,status_list):
+
+	last_Threadnum = Threadnum.value
 	last_throughput = bandwidth
 	counter = 0
 	time.sleep(4)
@@ -385,12 +382,11 @@ def NewResourceSize(originThreadnum,lock,bandwidth,status_list):
 	STD = 50
 	while status_list.count(-1)!=len(uploadFileNames):
 		try:
-			if STD>1:
+			if STD>0.5:
 				Unstable = True
 			else:
 				print "stable throughput =  "+str (numpy.median(history_throughput))
 				Unstable = False
-				break
 			if Unstable:
 				now_throughput = initargs(5,)
 				now_throughput = now_throughput/1024./1024.
@@ -407,19 +403,19 @@ def NewResourceSize(originThreadnum,lock,bandwidth,status_list):
 				if now_throughput < last_throughput/2 or counter>3:
 					print str(last_throughput) + " is higher than "+str(now_throughput)+" ,increase resource "
 					
-					New_Threadnum +=New_Threadnum
+					New_Threadnum.value +=New_Threadnum.value
 					last_throughput = now_throughput
 					counter = 0
 				else:
 					
 					counter+=1
-				if New_Threadnum > last_Threadnum :
+				if New_Threadnum.value > last_Threadnum :
 					lock.acquire()
-					Threadnum +=New_Threadnum-last_Threadnum
+					Threadnum.value += New_Threadnum.value-last_Threadnum
 					lock.release()
-					print "resource increase "+str(New_Threadnum-last_Threadnum)+" now is " +str(Threadnum)
-					last_Threadnum = New_Threadnum
-					print "change to New_Threadnum " +str(New_Threadnum) 	
+					print "resource increase "+str(New_Threadnum.value -last_Threadnum)+" now is " +str(Threadnum.value)
+					last_Threadnum = New_Threadnum.value
+					print "change to New_Threadnum " +str(New_Threadnum.value) 	
 			else:
 				initargs(10,)
 		except KeyboardInterrupt:
@@ -483,8 +479,7 @@ if __name__ == "__main__":
 
 	    '''
 	    t3 = time.time() - t1
-	    global Threadnum 
-	    bandwidth = 20/8
+	    bandwidth = 20/8.
 	    Threadnum =  max( 10 ,int(bandwidth/int(arg_dict['split'])))
 #	    Threadnum = int(20/int(arg_dict['split']))
 #	    Threadnum = 10
@@ -495,7 +490,7 @@ if __name__ == "__main__":
 
 
 	    print uploadFileNames 
-	    FIFO(arg_dict,uploadFileNames,bandwidth)
+	    FIFO(arg_dict,uploadFileNames,bandwidth,Threadnum)
 
 	    t2 = time.time() - t1
 	    print "total time= "+str(t2)
