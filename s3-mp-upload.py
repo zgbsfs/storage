@@ -5,8 +5,8 @@ import errno
 from cStringIO import StringIO
 import logging
 from math import ceil
-from multiprocessing import Process, Value, Array
-import multiprocessing.pool
+from multiprocessing import Process, Value, Array,Lock,current_process,active_children,Manager ,Pool
+#import multiprocessing.pool
 import time
 import urlparse
 from timeout import timeout
@@ -44,24 +44,25 @@ parser.add_argument("-get",help="the path ", default=False,  action="store_true"
 
 logger = logging.getLogger("s3-mp-upload")
 
-class NoDaemonProcess(multiprocessing.Process):
+#class NoDaemonProcess(multiprocessing.Process):
 # make 'daemon' attribute always return False
-    def _get_daemon(self):
-    	return False
-    def _set_daemon(self, value):
-	pass
-    daemon = property(_get_daemon, _set_daemon)
+#    def _get_daemon(self):
+#    	return False
+#    def _set_daemon(self, value):
+#	pass
+#    daemon = property(_get_daemon, _set_daemon)
 
 # We sub-class multiprocessing.pool.Pool instead of multiprocessing.Pool
 # because the latter is only a wrapper function, not a proper class.
-class NoDaemonProcessPool(multiprocessing.pool.Pool):
-	Process = NoDaemonProcess
+#class NoDaemonProcessPool(multiprocessing.pool.Pool):
+#	Process = NoDaemonProcess
 
 def handler(signum, frame):
 	raise UserWarning("failure occur!!")
 sp=0
 status_list=None
 New_Threadnum=0
+timeout_event=None
 #@timeout(sp/25, os.strerror(errno.ETIMEDOUT))
 #@timeout(5, os.strerror(errno.ETIMEDOUT))
 def do_part_upload(args,current_tries=1):
@@ -111,7 +112,8 @@ def do_part_upload(args,current_tries=1):
         t2 = time.time() - t1
         s = len(data)/1024./1024.
 	logger.info("Uploaded part %s (%0.2fM) in %0.3f s at %0.2f MBps" % (i, s, t2, s/t2))
-	return fname
+    except KeyboardInterrupt:
+	print "detect in here"
     except Exception, err:
 	current_tries = current_tries+1
 	#traceback.print_exc()
@@ -123,21 +125,21 @@ def do_part_upload(args,current_tries=1):
 		return
 
 
-def Thread_Upload(FileList,lock,filepath, dest, num_processes=2, split=50, force=False, reduced_redundancy=False, secure=False, max_tries=5, simulate=0,Threshold=0,get=False):
+def Thread_Upload(uploadFileNames,FileList,status_list,lock,filepath, dest, num_processes=2, split=50, force=False, reduced_redundancy=False, secure=False, max_tries=5, simulate=0,Threshold=0,get=False):
 
     #this is work  print currentThread().getName()
     # Check that dest is a valid S3 url
-    uploadFileNames = currentThread().getName()
-    global status_list
     lock.acquire()
     status_list[FileList.index(uploadFileNames)] = 'upload'
     lock.release()
+    print "inthread "  + status_list[FileList.index(uploadFileNames)]
     split_rs = urlparse.urlsplit(dest)
     filepath = uploadFileNames
     src = open(filepath, "rw+")
 
     filepath = uploadFileNames.replace(os.getcwd(),"")
-    print filepath
+    print num_processes
+    print split
 
     global sp
     if split>160:
@@ -211,23 +213,27 @@ def Thread_Upload(FileList,lock,filepath, dest, num_processes=2, split=50, force
     def master_progress(mpu,num_processes,bucket,upload_list):
 	    print "fucke "
 	    x=0
+	    x= len(mpu.get_all_parts())
+	    for i in mpu.get_all_parts():
+		a=int(str(i).split(" ")[1].split(">")[0])
+		if a in upload_list:
+			upload_list.remove(a)
 	    while True:
+
 		try:
+			print "aaaaa"
 			if x!=num_parts:
-				print "mpu.id = "+str(mpu.id) +"  is "+src.name +"  use " +str(num_processes)
-#				status_list[FileList.index(uploadFileNames)]=mpu.id	
-				pool = NoDaemonProcessPool(processes=num_processes)
+	#			print "mpu.id = "+str(mpu.id) +"  is "+src.name +"  use " +str(num_processes)
+				status_list[FileList.index(uploadFileNames)]=mpu.id	
+	#			print str(x) +" = master proce "  + status_list[FileList.index(uploadFileNames)]
+								
+				pool = Pool(processes=num_processes)
 				pool.map_async(do_part_upload, gen_args(x,fold_last,upload_list)).get(99999999)
-				print "I am " +str(pool)
+
                         src.close()
-			
                         mpu.complete_upload()
-			print "src name " +src.name
+			print "mpu.complete src name " +src.name
 			#os.remove(src.name)
-                        t2 = time.time() - t1
-                        s = size/1024./1024.
-			#print str(bucket) + str(s) + str(t2) + str(s/t2)
-                        logger.info("bucket %s part size = %d ,concurrency = %d ,Finished uploading %0.3fM in %0.3f s (%0.3f MBps)" %  (bucket,split ,num_processes, s, t2, s/t2))
 			global Threadnum
 			lock.acquire()
 			status_list[FileList.index(uploadFileNames)]=-1
@@ -241,12 +247,13 @@ def Thread_Upload(FileList,lock,filepath, dest, num_processes=2, split=50, force
 			logger.warn("Received KeyboardInterrupt, canceling upload")
 			pool.terminate()
 			mpu.cancel_upload()
-
+			print "keyboarddddddddddddddddddddddddddddddd"
 			break
 		except Exception, err:
 			logger.error("Encountered an error, canceling upload aaaaaaaaaaaa")
 			print src.name
 			logger.error(err)
+			break
 			#pool.terminate()
 			traceback.print_exc()
 			print mpu.get_all_parts()
@@ -283,13 +290,14 @@ def critical_threadnum(addback):
 		Threadnum +=addback
 
 def FIFO(arg_dict,uploadFileNames,bandwidth):
-    global status_list
+    manager = Manager()
+#    status_list = Array('i', range(len(uploadFileNames)))
+    status_list = manager.list(range(len(uploadFileNames)))
     global Threadnum 
     lock = Lock()
     i = 0
-    status_list = list((i)for i in range(len(uploadFileNames)))
     toThread = arg_dict.copy()
-    change_thread  = Thread(name='ChangeResource',target=NewResourceSize,args=(Threadnum,lock,bandwidth))
+    change_thread  = Process(name='ChangeResource',target=NewResourceSize,args=(Threadnum,lock,bandwidth,status_list))
     change_thread.daemon = True
 	
     change_thread.start() 
@@ -297,12 +305,15 @@ def FIFO(arg_dict,uploadFileNames,bandwidth):
 
 #    if arg_dict['simulate']!=0:
 #	    signal.alarm(int(random.expovariate(1.0/simulate)))
-    signal.alarm(5)
-    signal.signal(signal.SIGALRM, handler)
+    #signal.alarm(50)
+    #signal.signal(signal.SIGALRM, handler)
     Thread_list=[]
+    Failure = 0
+    dict_list = list((i)for i in range(len(uploadFileNames)))
     while True:
 	    try:
 		    if status_list.count(-1)==len(uploadFileNames):
+			    change_thread.terminate()
 			    break
 		    if i == len(uploadFileNames):
 			    i=0
@@ -311,29 +322,49 @@ def FIFO(arg_dict,uploadFileNames,bandwidth):
 					    i=0
 				    else:
 					    i+=1
-		    if Threadnum >0 and status_list[i]==i:
-			    toThread['filepath'] ,toThread['num_processes'] = FIFOargs(uploadFileNames,i,arg_dict['split'],arg_dict['num_processes']
-			    )
+		    if Threadnum >0 and status_list[i]==i :
+			    print "e04    "+ str(status_list[i]) +"    "+str(i)
+			    print "one time "
+			    if dict_list[i]==i:
+				    toThread['filepath'] ,toThread['num_processes'] = FIFOargs(uploadFileNames,i,arg_dict['split'],arg_dict['num_processes'])
+				    toThread['split']-=Failure
+				    dict_list[i] = toThread
+			    configure = dict_list[i]
+				   
 			    if Threadnum != 0  and Threadnum < toThread['num_processes']:
 				    i+=1
 				    if status_list[i]==i:#status_list[i]!=-1 or status_list[i]!='upload':
 					    continue
-			    func = partial(Thread_Upload,**toThread)
-			    a = Thread(name=uploadFileNames[i],target=func,args=(uploadFileNames,lock))
+			    func = partial(Thread_Upload,**configure)
+			    a = Process(name=uploadFileNames[i],target=func,args=(uploadFileNames[i],uploadFileNames,status_list,lock))
+			    a.daemon =False
 			    a.start()
-			    Thread_list.append(a)
 			    Threadnum -= toThread['num_processes']
 			    i+=1
 		    else:
 			    i+=1
+		
 	    except IndexError:
 		pass
 	    except KeyboardInterrupt:
 		print "FIFO ^c"
 		break
 	    except UserWarning:
-		print Thread_list
-		signal.alarm(5)
+		Failure +=1
+		print active_children()
+		for task_process in  active_children():
+			task_process.terminate()
+		for i in range(len(status_list)):
+                        if status_list[i]=='upload':
+                                status_list[i]=i
+		Threadnum = 10	
+		print "Dont plerase" + str(active_children())
+		print status_list
+		#while active_children():
+		#	print "have" +str(active_children())
+		#	task_process.terminate()
+		#signal.alarm(50)
+
 
 def FIFOargs(uploadFileNames,now,split,inputProcessNum):
 	sizeinMB = os.path.getsize(uploadFileNames[now])/1024./1024.
@@ -342,8 +373,7 @@ def FIFOargs(uploadFileNames,now,split,inputProcessNum):
 		num_process = inputProcessNum
 #	print uploadFileNames[now],num_process
 	return uploadFileNames[now],num_process
-def NewResourceSize(originThreadnum,lock,bandwidth):
-	global status_list
+def NewResourceSize(originThreadnum,lock,bandwidth,status_list):
 	global New_Threadnum
 	global Threadnum
 	New_Threadnum = Threadnum
@@ -355,16 +385,16 @@ def NewResourceSize(originThreadnum,lock,bandwidth):
 	STD = 50
 	while status_list.count(-1)!=len(uploadFileNames):
 		try:
-			if STD>2:
+			if STD>1:
 				Unstable = True
 			else:
-				print "stable throughput =  "+str (numpy.average(history_throughput))
+				print "stable throughput =  "+str (numpy.median(history_throughput))
 				Unstable = False
 				break
 			if Unstable:
 				now_throughput = initargs(5,)
 				now_throughput = now_throughput/1024./1024.
-				if len(history_throughput)>4 :
+				if len(history_throughput)>5 :
 					print "WTFFFF  " +str(numpy.std(history_throughput))
 					STD = float(numpy.std(history_throughput))
 
@@ -390,6 +420,8 @@ def NewResourceSize(originThreadnum,lock,bandwidth):
 					print "resource increase "+str(New_Threadnum-last_Threadnum)+" now is " +str(Threadnum)
 					last_Threadnum = New_Threadnum
 					print "change to New_Threadnum " +str(New_Threadnum) 	
+			else:
+				initargs(10,)
 		except KeyboardInterrupt:
 			print "NewResource ^c"
 			break
