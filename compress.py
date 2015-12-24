@@ -76,6 +76,7 @@ def CompressBigFile(BigFilePath,S3KeyName,rootDir,WaitingToUpload,InDir):
 				print rootDir
 				print S3KeyName
 				print str(i)+ " WTF  "  + BigFilePath.replace(rootDir,S3KeyName)
+
 				return os.path.abspath(BigFilePath),BigFilePath.replace(rootDir,S3KeyName)
 			else:
 				return os.path.abspath(BigFilePath),True
@@ -118,7 +119,7 @@ def Compression(rootDir,S3KeyName,Threshold):
 			    if os.path.getsize(sourcepath) > Threshold * MB:
 				#big file list
 				Uploadsize += os.path.getsize(sourcepath)
-				Newpath , Metapath = CompressBigFile(sourcepath,S3KeyName,sourceDir+'/',WaitingToUpload,True)
+				Newpath , Metapath = CompressBigFile(sourcepath,S3KeyName,rootDir,WaitingToUpload,True)
 				UploadBigFileList.append(Newpath)
 			        BigFileList.append(Metapath)
 				WriteToBigFileMetaList.append(Metapath.replace(rootDir,S3KeyName))
