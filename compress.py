@@ -96,7 +96,7 @@ def MakeDir(directory):
 	if not os.path.exists(directory):
 		    os.makedirs(directory)
 
-def Compression(rootDir,S3KeyName,Threshold):
+def Compression(rootDir,S3KeyName,Threshold,compression):
 	combine_list = []
 	BigFileList = []
 	UploadBigFileList = []
@@ -152,12 +152,22 @@ def Compression(rootDir,S3KeyName,Threshold):
 
 	if BigFileList: 
 		BigFileMetadata(BigFileList,WaitingToUpload)
-	Compressfilelist = Compress_all_files(WaitingToUpload)
-	Metadatalist     = Metadata_list(WaitingToUpload)
 	b=0
-	for f in UploadBigFileList+Compressfilelist:
-		b+=os.path.getsize(f)
-	return UploadBigFileList+Compressfilelist,Metadatalist ,b
+	Metadatalist     = Metadata_list(WaitingToUpload)
+
+	if not compression:
+		for f in NewFileName+UploadBigFileList+Metadatalist:
+			b+=os.path.getsize(f)
+		print "== FAlse"
+		return NewFileName+UploadBigFileList,Metadatalist,b
+	else:
+		Compressfilelist = Compress_all_files(WaitingToUpload)
+
+
+		for f in UploadBigFileList+Compressfilelist:
+			b+=os.path.getsize(f)
+		print "== TRUe"
+		return UploadBigFileList+Compressfilelist,Metadatalist ,b
 	'''
 	Combine_files(Compressfilelist,rootDir,WaitingToUpload,"upload")
 	print combine_size_list

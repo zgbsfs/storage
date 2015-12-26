@@ -62,7 +62,7 @@ logger = logging.getLogger("s3-mp-upload")
 def handler(signum, frame):
 	raise UserWarning("failure occur!!")
 sp=0
-#@timeout(sp/25, os.strerror(errno.ETIMEDOUT))
+@timeout(sp/5, os.strerror(errno.ETIMEDOUT))
 #@timeout(5, os.strerror(errno.ETIMEDOUT))
 def do_part_upload(args,current_tries=1):
     """
@@ -333,17 +333,11 @@ def FIFO(arg_dict,uploadFileNames,bandwidth,input_threadnum):
 			    return Failure
 		    if Failure>0:
 			    print str(status_list)
-		    if Threadnum.value >0 and (status_list[in_the_while_iter]==in_the_while_iter or str(type(status_list[in_the_while_iter]))=="<class 'boto.s3.multipart.MultiPartUpload'>"):
+		    if Threadnum.value >0 and status_list[in_the_while_iter]==in_the_while_iter:# or str(type(status_list[in_the_while_iter]))=="<class 'boto.s3.multipart.MultiPartUpload'>"):
 #			    print str(Threadnum.value)  +"  num "+str(in_the_while_iter)+ " int  " + str(status_list[in_the_while_iter]) + " wha   " + str(type(status_list[in_the_while_iter]))+ " type  " 
 #			    dict_list[i]['Retransmit']
 #			    if dict_list[i]['Retransmit']==True:
 #				    dict_list[i]['Retransmit']==False
-			   # print "e04    "+ str(status_list[i]) +"    "+str(i)
-			    #print "one time "
-#			    print i 
-#			    time.sleep(1)
-#		            print "head"
-#			    print str(dict_list)
 			    if dict_list[in_the_while_iter]=='new':
 				    toThread['filepath'] ,toThread['num_processes'] = FIFOargs(uploadFileNames,in_the_while_iter,arg_dict['split'],arg_dict['num_processes'])
 				    toThread['Retransmit']='init'
@@ -355,7 +349,7 @@ def FIFO(arg_dict,uploadFileNames,bandwidth,input_threadnum):
 				
   				    dada=0
 			    print str(uploadFileNames[in_the_while_iter])+"   now is  here " +str(dict_list[in_the_while_iter]) 
-			    if Threadnum.value != 0  and Threadnum.value < toThread['num_processes'] :
+			    if  Threadnum.value < toThread['num_processes'] :
 				if dict_list[in_the_while_iter]['Retransmit']=='init':
 #				    print " i is  ??= "+str(i) +"  " +str(uploadFileNames[i])+ " here   "+ str(Threadnum.value)+ "  No here  " +str(dict_list[i])
 
@@ -363,7 +357,6 @@ def FIFO(arg_dict,uploadFileNames,bandwidth,input_threadnum):
 				    dict_list[in_the_while_iter]='new'
 				    print " I =  "+str(in_the_while_iter) + "  ???  "+ str(dict_list[in_the_while_iter])
 				    in_the_while_iter+=1
-				    print "add 1 iter in init while  is " +str(in_the_while_iter)
 				elif dict_list[in_the_while_iter]['Retransmit']:
 				    in_the_while_iter+=1
 				    print " TUREEEEE"
@@ -445,9 +438,10 @@ def NewResourceSize(New_Threadnum,Threadnum,lock,bandwidth,status_list):
 	last_Threadnum = Threadnum.value
 	last_throughput = bandwidth
 	counter = 0
-	time.sleep(4)
+#	time.sleep(4)
 	history_throughput = []
 	STD = 50
+	print "start to computing throught"
 	while True:
 		try:
 			if status_list.count('finish') == len(uploadFileNames):
@@ -458,9 +452,9 @@ def NewResourceSize(New_Threadnum,Threadnum,lock,bandwidth,status_list):
 				print "stable throughput =  "+str (numpy.median(history_throughput))
 				Unstable = False
 			if Unstable:
-				now_throughput = initargs(5,)
+				now_throughput = initargs(2,)
 				now_throughput = now_throughput/1024./1024.
-				if len(history_throughput)>4 :
+				if len(history_throughput)>3 :
 #					print "WTFFFF  " +str(numpy.std(history_throughput))
 					STD = float(numpy.std(history_throughput))
 
@@ -470,7 +464,7 @@ def NewResourceSize(New_Threadnum,Threadnum,lock,bandwidth,status_list):
 				else:
 					history_throughput.insert(0,now_throughput)
 				print history_throughput
-				if now_throughput < last_throughput/2 or counter>3:
+				if now_throughput < last_throughput/2 or counter>2:
 					print str(last_throughput) + " is higher than "+str(now_throughput)+" ,increase resource "
 					
 					New_Threadnum.value += 10
@@ -487,11 +481,10 @@ def NewResourceSize(New_Threadnum,Threadnum,lock,bandwidth,status_list):
 					last_Threadnum = New_Threadnum.value
 					print "change to New_Threadnum " +str(New_Threadnum.value) 	
 			else:
-				initargs(5,)
+				initargs(2,)
 		except KeyboardInterrupt:
 			print "NewResource ^c"
 			break
-	print "stop please"
 
 if __name__ == "__main__":
     #logging.basicConfig(level=logging.INFO)
@@ -536,7 +529,9 @@ if __name__ == "__main__":
 		afterCompressSize = 0
 		Uploadsize = os.path.getsize(Upload_dir_Name)/1024.
 	    else:
-		GZfile,METAfile,afterCompressSize = compress.Compression(filepath,split_rs.path,arg_dict['Threshold'])
+
+		GZfile,METAfile,afterCompressSize = compress.Compression(filepath,split_rs.path,arg_dict['Threshold'],True)
+		#GZfile,METAfile,afterCompressSize = compress.Compression(filepath,split_rs.path,arg_dict['Threshold'],False)
 		uploadFileNames = GZfile+METAfile
 	
 	    '''
@@ -549,8 +544,9 @@ if __name__ == "__main__":
 
 	    '''
 	    t3 = time.time() - t1
-	    bandwidth = 20/8.
-	    Threadnum =  max( 10 ,int(bandwidth/int(arg_dict['split'])))
+	    bandwidth = 100
+	    Threadnum =  max( 15 ,int(bandwidth/int(arg_dict['split'])))
+
 #	    Threadnum = int(20/int(arg_dict['split']))
 #	    Threadnum = 10
 	    print Threadnum
