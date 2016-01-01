@@ -175,12 +175,16 @@ def Thread_Upload(New_Threadnum,Threadnum,uploadFileNames,FileList,status_list,l
     num_parts = int(ceil(size / part_size))
 
     # If file is less than 5M, just upload it directly
-    if size < split*1024*1024:
+    if size < part_size*1024*1024:
 	print src.name +'  single use ' +str (num_processes)
+
 	src.seek(0)
 	t1 = time.time()
 	k = boto.s3.key.Key(bucket,filepath)
+	logger.error(str(src.name) +" start ")
+
 	k.set_contents_from_file(src)
+	logger.error(str(src.name) +" stop " )
 	t2 = time.time() - t1
 	s = size/1024./1024.
 	'''
@@ -254,11 +258,16 @@ def Thread_Upload(New_Threadnum,Threadnum,uploadFileNames,FileList,status_list,l
 	    while True:
 		try:
 			if x!=num_parts:
+				logger.error(str(src.name) +" start " )
 				pool = Pool(processes=num_processes)
 				pool.map_async(do_part_upload, gen_args(x,fold_last,upload_list)).get(99999999)
 			src.close()
+
 #			pool.terminate()
                         mpu.complete_upload()
+			logger.error(str(src.name) +" stop " )
+			#proc = subprocess.Popen('date', stdout=subprocess.PIPE)
+			#print stdout
 			print "mpu.complete src name " +src.name
 			#os.remove(src.name)
 			print "index in proc = "+str(FileList.index(uploadFileNames))
@@ -329,7 +338,10 @@ def FIFO(arg_dict,uploadFileNames,bandwidth,input_threadnum):
 #    while status_list.count(-1) != len(uploadFileNames):
     while True:
 	    try:
+		    if in_the_while_iter>len(uploadFileNames)-1:
+			    in_the_while_iter=0
 		    if status_list.count('finish') == len(uploadFileNames):
+			    logger.error(dict_list)			   
 			    return Failure
 		    if Failure>0:
 			    print str(status_list)
@@ -348,14 +360,14 @@ def FIFO(arg_dict,uploadFileNames,bandwidth,input_threadnum):
 			    else:	
 				
   				    dada=0
-			    print str(uploadFileNames[in_the_while_iter])+"   now is  here " +str(dict_list[in_the_while_iter]) 
+		#	    print str(uploadFileNames[in_the_while_iter])+"   now is  here " +str(dict_list[in_the_while_iter]) 
 			    if  Threadnum.value < toThread['num_processes'] :
 				if dict_list[in_the_while_iter]['Retransmit']=='init':
 #				    print " i is  ??= "+str(i) +"  " +str(uploadFileNames[i])+ " here   "+ str(Threadnum.value)+ "  No here  " +str(dict_list[i])
 
 #				    time.sleep(1)
 				    dict_list[in_the_while_iter]='new'
-				    print " I =  "+str(in_the_while_iter) + "  ???  "+ str(dict_list[in_the_while_iter])
+	#			    print " I =  "+str(in_the_while_iter) + "  ???  "+ str(dict_list[in_the_while_iter])
 				    in_the_while_iter+=1
 				elif dict_list[in_the_while_iter]['Retransmit']:
 				    in_the_while_iter+=1
@@ -374,9 +386,6 @@ def FIFO(arg_dict,uploadFileNames,bandwidth,input_threadnum):
 		    else:
 			    in_the_while_iter+=1
 #		    print status_list
-		    if in_the_while_iter>len(uploadFileNames)-1:
-				in_the_while_iter=0
-#			    print "hello " +str(len(uploadFileNames))
 		       
 	    except IndexError:
 		continue
@@ -435,10 +444,10 @@ def FIFOargs(uploadFileNames,now,split,inputProcessNum):
 	return uploadFileNames[now],num_process
 def NewResourceSize(New_Threadnum,Threadnum,lock,bandwidth,status_list):
 
-	last_Threadnum = Threadnum.value
+	last_Threadnum = 5
 	last_throughput = bandwidth
 	counter = 0
-#	time.sleep(4)
+	time.sleep(2)
 	history_throughput = []
 	STD = 50
 	print "start to computing throught"
@@ -452,7 +461,7 @@ def NewResourceSize(New_Threadnum,Threadnum,lock,bandwidth,status_list):
 				print "stable throughput =  "+str (numpy.median(history_throughput))
 				Unstable = False
 			if Unstable:
-				now_throughput = initargs(2,)
+				now_throughput = initargs(5,)
 				now_throughput = now_throughput/1024./1024.
 				if len(history_throughput)>3 :
 #					print "WTFFFF  " +str(numpy.std(history_throughput))
@@ -464,16 +473,19 @@ def NewResourceSize(New_Threadnum,Threadnum,lock,bandwidth,status_list):
 				else:
 					history_throughput.insert(0,now_throughput)
 				print history_throughput
-				if now_throughput < last_throughput/2 or counter>2:
+				if now_throughput < (last_throughput/2) or counter>2:
 					print str(last_throughput) + " is higher than "+str(now_throughput)+" ,increase resource "
 					
-					New_Threadnum.value += 10
+					New_Threadnum.value += 4
 					last_throughput = now_throughput
 					counter = 0
 				else:
 					
 					counter+=1
 				if New_Threadnum.value > last_Threadnum :
+					proc = subprocess.Popen(['date'], stdout=subprocess.PIPE)
+					strlist = proc.stdout.read()
+					logger.error("resource increse  " + str(New_Threadnum.value-last_Threadnum))
 					lock.acquire()
 					Threadnum.value += New_Threadnum.value-last_Threadnum
 					lock.release()
@@ -481,7 +493,7 @@ def NewResourceSize(New_Threadnum,Threadnum,lock,bandwidth,status_list):
 					last_Threadnum = New_Threadnum.value
 					print "change to New_Threadnum " +str(New_Threadnum.value) 	
 			else:
-				initargs(2,)
+				initargs(5,)
 		except KeyboardInterrupt:
 			print "NewResource ^c"
 			break
@@ -507,8 +519,8 @@ if __name__ == "__main__":
 	    logger.addHandler(hdlr)
 	    logger.setLevel(logging.ERROR)
 	   	
-	   # bandwidth = float(Thread(name='ChangeResource',target=getBandwidth,args=('something',)))	    
-	   # print "bandwidth = "+ str(bandwidth)
+	    bandwidth = float(getBandwidth())	    
+	    print "bandwidth = "+ str(bandwidth)
 
 	    filepath = arg_dict['filepath']
 	    print arg_dict
@@ -522,7 +534,7 @@ if __name__ == "__main__":
 	    uploadFileNames = []
 	    Upload_dir_Name = os.getcwd()+split_rs.path
 	    t1 = time.time()
-
+	    arg_dict['Threshold'] =int(bandwidth*3/2)
 	    if os.path.isfile(filepath):
 		Upload_dir_Name ,nocompression= compress.CompressBigFile(filepath,split_rs.path,filepath,Upload_dir_Name,False)
 		uploadFileNames.append(Upload_dir_Name)
@@ -530,8 +542,8 @@ if __name__ == "__main__":
 		Uploadsize = os.path.getsize(Upload_dir_Name)/1024.
 	    else:
 
-		GZfile,METAfile,afterCompressSize = compress.Compression(filepath,split_rs.path,arg_dict['Threshold'],True)
-		#GZfile,METAfile,afterCompressSize = compress.Compression(filepath,split_rs.path,arg_dict['Threshold'],False)
+	#	GZfile,METAfile,afterCompressSize = compress.Compression(filepath,split_rs.path,arg_dict['Threshold'],True)
+		GZfile,METAfile,afterCompressSize = compress.Compression(filepath,split_rs.path,arg_dict['Threshold'],False)
 		uploadFileNames = GZfile+METAfile
 	
 	    '''
@@ -544,8 +556,10 @@ if __name__ == "__main__":
 
 	    '''
 	    t3 = time.time() - t1
-	    bandwidth = 100
-	    Threadnum =  max( 15 ,int(bandwidth/int(arg_dict['split'])))
+#	    bandwidth = 100
+	    arg_dict['split'] = int (bandwidth/2)
+	    arg_dict['num_processes'] = int(bandwidth/3)
+	    Threadnum =  max( 5 ,int(bandwidth/int(arg_dict['split'])))
 
 #	    Threadnum = int(20/int(arg_dict['split']))
 #	    Threadnum = 10

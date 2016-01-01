@@ -6,6 +6,7 @@ import os.path
 import tarfile
 import sys
 import pickle
+import time
 
 MAX_SIZE = 5 * 1000 * 1000
 #Threshold = 30
@@ -110,13 +111,16 @@ def Compression(rootDir,S3KeyName,Threshold,compression):
 	Uploadsize=0	
 	WaitingToUpload = os.getcwd()+S3KeyName 
 	MakeDir(WaitingToUpload)
-	
+	localtime = time.asctime( time.localtime(time.time()) )
+	print "Local current time :", localtime
 	for ( sourceDir, dirname, filename) in os.walk(rootDir):
 		#print os.path.getsize(sourceDir)/(1024.0)
 		for f in filename:
 		    sourcepath =  os.path.join(sourceDir, f)
 		    if  Combine_size < Threshold * MB:
 			    if os.path.getsize(sourcepath) > Threshold * MB:
+				localtime = time.asctime( time.localtime(time.time()) )
+				print "Local current time :", localtime
 				#big file list
 				Uploadsize += os.path.getsize(sourcepath)
 				Newpath , Metapath = CompressBigFile(sourcepath,S3KeyName,rootDir,WaitingToUpload,True)
