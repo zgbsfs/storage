@@ -26,6 +26,7 @@ import getfile
 from threading import Thread,Lock,currentThread
 from traffic import initargs
 import numpy
+
 parser = argparse.ArgumentParser(description="Transfer large files to S3",
         prog="s3-mp-upload")
 parser.add_argument("filepath",  help="The file to transfer")
