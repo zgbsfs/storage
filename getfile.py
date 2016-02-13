@@ -4,6 +4,7 @@ import pickle
 import boto3
 import os
 import tarfile
+
 def longpath(keyname):
 	Split = keyname.split('/')
 	string=''
@@ -17,6 +18,8 @@ def longpath(keyname):
 def parseMeta(local,keyname):
 	print 'in parse'
 	Split = keyname.split('/')
+	indexofthing = 'notfound'
+	indexofbinthing ='notfound' 
 	longSplit=[]
 	if len(Split)==2:
 		Split.append(Split[1])
@@ -27,21 +30,56 @@ def parseMeta(local,keyname):
 		longSplit.append(longpath(keyname))
 		Split = longSplit
 	print Split
+	Tarf=[]
+	Tarf.append(False)
 	with tarfile.open(local, "r:gz") as tar:
-		for tarinfo in tar:
-			filenameintar =  str(tarinfo).split('\'')[1]
-			if Split[1] in filenameintar:
-#				print filenameintar
+		memberlist =tar.getmembers()
+		for memberindex in  range(len(memberlist)):
+			member = memberlist[memberindex]
+			filenameintar =  str(member).split('\'')[1]
+#			fileintar = tar.extractfile(filenameintar)
+ #                       content =pickle.load(fileintar)
+			'''
+			if 'bin' in filenameintar:
 				fileintar = tar.extractfile(filenameintar)
-				content =pickle.load(fileintar)
-				try:	
-					index = [i for i,word in enumerate(content) if word.find(Split[2])!=-1]
-					print content[index]
-					print index
-				except:
-					pass
+	                        content =pickle.load(fileintar)			
+				try:
+					indexofbinthing = content.index(thing)
 					
-			
+				except:
+					continue
+			if indexofthing!='notfound':
+				fileintar = tar.extractfile(filenameintar)
+				content = pickle.load(fileintar)
+				if indexofthing==0:
+					filehead=0
+				else:
+					filehead=content[indexofthing-1]
+				filetail=content[indexofthing]
+				return filehead,filetail
+			'''
+			if Split[1] in filenameintar:
+				fileintar = tar.extractfile(filenameintar)
+	                        content =pickle.load(fileintar)
+				for i,word in enumerate(content):
+					try:
+						if word.find(Split[2])!=-1:
+							thing= content[i]
+							indexofthing = i
+							print thing
+							print indexofthing
+							member = memberlist[memberindex+1]
+							filenameintar =  str(member).split('\'')[1]
+							fileintar = tar.extractfile(filenameintar)
+				                        content =pickle.load(fileintar)
+							if indexofthing==0:
+								filehead=0
+							else:
+								filehead=content[indexofthing-1]
+							filetail=content[indexofthing]
+							return filehead,filetail
+					except:
+						pass
 
 def GetMetadata(bucketname,keyname,dest):
 	s3 = boto3.resource('s3')
@@ -61,7 +99,9 @@ def GetTheFile(Filepath,dest):
 	'''direct download here'''
 	#s3.meta.client.download_file(bucketname, keyname, keyname.split('/')[0]+'Meta.tar.gz')
 	localmetafile = GetMetadata(bucketname,keyname,dest)
-	parseMeta(localmetafile,keyname)
+	filehead,filetail = parseMeta(localmetafile,keyname)
+	print filehead
+	print filetail
 	return 
 	client = boto3.client('s3')
 	response = client.get_object(Bucket=bucketname,Key='1g/bin1',Range='bytes='+str(filehead+binhead)+'-'+str(filehead))
