@@ -139,6 +139,7 @@ def Compress_list(list_of_file,sourceDir,WaitingToUpload,inputforname,S3KeyName)
 		new = os.path.getsize(b)
 		return b,new
 	'''
+	new = os.path.getsize(b)
 	return b,new
 def Compress_all_files(Dirpath,S3KeyName):
 	CompressfilesInDir = []
@@ -305,14 +306,11 @@ def Compression(rootDir,S3KeyName,Threshold,compression,listofsampling,expectSpe
 				UploadBigFileList.append(return_path)
 			else:
 				item[return_path]  = return_size
-
 	print "onlyfilesfdasopfask;ls"
-	'''   '''
 	sorted_x = sorted(item.items(), key=operator.itemgetter(1), reverse=True)
 #	sorted_x.append(('/Users/ytlin/GitHub/storage/1g/imaadsfasdfsa_data', 12546228))
 #	sorted_x.append(('/Users/ytlin/GitHub/storage/1g/imaadsfasdfsa_data', 11546228))
 	bins =binpack.packAndShow(sorted_x,Threshold*MB)
-	print NewFileName
 	binnum=0
 	UploadFileList+= UploadBigFileList
 	for bin in bins:

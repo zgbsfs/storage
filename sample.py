@@ -32,10 +32,12 @@ def Compress_list(list_of_file) :
 	t2 = time.time()
 	dur = t2 -t1
 	new = os.path.getsize(b)
-	print new
-	print orisize
-	print "duration "  +str(dur)
-	print float(new)/float(orisize)
+	print "  compress    " + str(new)
+	print "-------------"
+	print "  ori         " + str(orisize)
+	print '=  '+str(float(new)/float(orisize))
+
+	print "duration     "  +str(dur)
 	throughput = orisize/float(dur)
 	
 
@@ -45,10 +47,10 @@ def Sampling(filepath,S3KeyName,CombineThreshold,True ,avgFilesize):
 #	print a /1g/
 #	print avgFilesize
 #	print CombineThreshold
+	maxThroughput =0
 	randomfilelist=[]
 	returnarr=[]
 	dic={}
-	WaitingToUpload = os.getcwd()+S3KeyName
 	for ( sourceDir, dirname,filename) in os.walk(filepath):
 		print sourceDir
 #		print dirname
@@ -56,20 +58,22 @@ def Sampling(filepath,S3KeyName,CombineThreshold,True ,avgFilesize):
 		dic['path'] = sourceDir
 		randomtime =int(Percentage*len(filename))
 
-		if len(filename) ==0:
+		if len(filename) == 0:
 			continue
-		if randomtime <1:
+		if randomtime < 1:
 			randomtime=1
-		
+		print str(len(filename))+"   files choose  "+ str(randomtime)		
 		for i in range(randomtime):
 			a = random.choice(filename)
 			filename.remove(a)
 			randomfilelist.append(os.path.join(sourceDir, a))
-		'''(list_of_file,sourceDir,WaitingToUpload,inputforname,S3KeyName)'''
+
 		rate,throughput=Compress_list(randomfilelist)
 		dic['rate'] = rate
 		dic['throughput'] = throughput
 		returnarr.append(dic.copy())
+		if maxThroughput <throughput:
+			maxThroughput = throughput
 
 
-	return returnarr
+	return returnarr ,maxThroughput

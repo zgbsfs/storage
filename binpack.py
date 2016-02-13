@@ -3,27 +3,35 @@
     http://www.ams.org/new-in-math/cover/bins1.html
     for a simple description of the method.
 '''
-
+import copy
     
 class Bin(object):
     ''' Container for items that keeps a running sum '''
     def __init__(self):
         self.items = []
         self.sum = 0
-    
+    def __iter__(self):
+	for item in self.items:
+	        yield item
     def append(self, item):
         self.items.append(item)
         self.sum += item[1]
-
-
-
+    def __len__(self):
+	return len(self.items)
     def __str__(self):
         ''' Printable representation '''
         return 'Bin(sum=%d, items=%s)' % (self.sum, str(self.items))
-        
+    def getitempath(self):
+	pathlist=[]
+	sizebinlist=[]
+	sizeinbin=0
+	for item in self.items:
+		pathlist.append(item[0])
+		sizeinbin+=item[1]
+		sizebinlist.append(sizeinbin)
+	return pathlist,sizebinlist
         
 def pack(values, maxValue):
-    values = sorted(values, key=lambda x: x[1], reverse=True)
     bins = []
     # import ipdb; ipdb.set_trace()
     for item in values:
@@ -42,26 +50,46 @@ def pack(values, maxValue):
     
     return bins
 
-
-if __name__ == '__main__':
-    import random
-
-    def packAndShow(aList, maxValue):
+def packAndShow(aList, maxValue):
         ''' Pack a list into bins and show the result '''
-        print 'List with sum', sum(aList), 'requires at least', (sum(aList)+maxValue-1)/maxValue, 'bins'
-        
+	#print str(aList)+str(maxValue)
+	sumofsize =0
+	for item in aList:
+		sumofsize+=item[1]
+        print 'List with sum', sumofsize, 'requires at least', (sumofsize+maxValue-1)/maxValue, 'bins'
+
+        #print aList
         bins = pack(aList, maxValue)
-        
+	diffarr=[]
+	print 'Solution using', len(bins), 'bins:'
+	for bin in bins:
+		diffarr.append( maxValue-bin.sum)
+            	print bin
+		lastbin = bin
+	print "sum of different    " + str(sum(diffarr))
+	bins.pop()
+	diffarr.pop()
+	copydiffarr = copy.copy(diffarr)
+	delta =0
+
+	for howmany in range(len(lastbin)):
+		delta+=max(diffarr)
+		diffarr.pop()
+	print diffarr
+	print copydiffarr
+
+	if delta +maxValue> 2*lastbin.sum:
+		print "repack bins"
+		for item in lastbin:
+			binindex = copydiffarr.index(max(copydiffarr))
+			copydiffarr[binindex]=0
+			bins[binindex].append(item)
+		
+	sumofsize=0		
         print 'Solution using', len(bins), 'bins:'
         for bin in bins:
             print bin
-        
-        print
-        
-        
-    aList = [10,9,8,7,6,5,4,3,2,1]
-    packAndShow(aList, 11)
-    
-    aList = [ random.randint(1, 11) for i in range(100) ]
-    packAndShow(aList, 11)
-    
+	    sumofsize +=abs(maxValue-bin.sum)
+
+	print "sum of different   " + str(sumofsize)
+   	return bins 
