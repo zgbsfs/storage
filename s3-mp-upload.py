@@ -21,7 +21,7 @@ import compress
 from functools import partial
 import subprocess
 import shutil
-
+import sample
 import getfile
 from threading import Thread,Lock,currentThread
 from traffic import initargs
@@ -62,8 +62,8 @@ logger = logging.getLogger("s3-mp-upload")
 def handler(signum, frame):
 	raise UserWarning("failure occur!!")
 sp=0
-@timeout(sp/5, os.strerror(errno.ETIMEDOUT))
-#@timeout(5, os.strerror(errno.ETIMEDOUT))
+#@timeout(sp/5, os.strerror(errno.ETIMEDOUT))
+#@timeout(10, os.strerror(errno.ETIMEDOUT))
 def do_part_upload(args,current_tries=1):
     """
     Upload a part of a MultiPartUpload
@@ -80,6 +80,10 @@ def do_part_upload(args,current_tries=1):
                  The arguments are: S3 Bucket name, MultiPartUpload id, file
                  name, the part number, part offset, part size
     """
+    hdlr = logging.FileHandler("bigmultipart.log")
+    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+    hdlr.setFormatter(formatter)
+    logger.addHandler(hdlr)
     # Multiprocessing args lameness
     bucket_name, mpu_id, fname, i, start, size, secure, max_tries, current_tries = args
     #print args
@@ -106,16 +110,18 @@ def do_part_upload(args,current_tries=1):
 
     try:
         # Do the upload
+#	print "which part "+ str (i)
         t1 = time.time()
 	mpu.upload_part_from_file(StringIO(data), i)
         t2 = time.time() - t1
         s = len(data)/1024./1024.
-	logger.info("Uploaded part %s (%0.2fM) in %0.3f s at %0.2f MBps" % (i, s, t2, s/t2))
+	logger.error("Uploaded part %s (%0.2fM) in %0.3f s at %0.2f MBps" % (i, s, t2, s/t2))
     except KeyboardInterrupt:
 	print "detect in here"
     except IOError:
 	print "IO   in here"
     except Exception, err:
+	print "time error     " + str(mpu) + "  part  " +str(i)
 	current_tries = current_tries+1
 	#traceback.print_exc()
 	logger.info(err)
@@ -130,7 +136,6 @@ def do_part_upload(args,current_tries=1):
 def Thread_Upload(New_Threadnum,Threadnum,uploadFileNames,FileList,status_list,lock,filepath, dest, num_processes=2, split=50, force=False, reduced_redundancy=False, secure=False, max_tries=5, simulate=0,Threshold=0,get=False,Retransmit=False):
     if status_list[FileList.index(uploadFileNames)] =='finish':
 		print str(uploadFileNames)+"  you shoud not here"
-    		return
     #this is work  print currentThread().getName()
     print "I am " +str(uploadFileNames) +" Retrans = " +str(Retransmit)+" proc= "+str(num_processes) +" status = " +str(status_list[FileList.index(uploadFileNames)])
     # Check that dest is a valid S3 url
@@ -175,7 +180,7 @@ def Thread_Upload(New_Threadnum,Threadnum,uploadFileNames,FileList,status_list,l
     num_parts = int(ceil(size / part_size))
 
     # If file is less than 5M, just upload it directly
-    if size < part_size*1024*1024:
+    if size < split*1024*1024:
 	print src.name +'  single use ' +str (num_processes)
 
 	src.seek(0)
@@ -250,15 +255,18 @@ def Thread_Upload(New_Threadnum,Threadnum,uploadFileNames,FileList,status_list,l
     t1 = time.time()
     def master_progress(mpu,num_processes,bucket,upload_list):
 	    x=0
+	    '''
 	    x= len(mpu.get_all_parts())
 	    for i in mpu.get_all_parts():
 		a=int(str(i).split(" ")[1].split(">")[0])
 		if a in upload_list:
 			upload_list.remove(a)
+	    '''
+	    print "proc = ?? "  + str(num_processes)
 	    while True:
 		try:
 			if x!=num_parts:
-				logger.error(str(src.name) +" start " )
+	#			logger.error(str(src.name) +" start " )
 				pool = Pool(processes=num_processes)
 				pool.map_async(do_part_upload, gen_args(x,fold_last,upload_list)).get(99999999)
 			src.close()
@@ -297,7 +305,7 @@ def Thread_Upload(New_Threadnum,Threadnum,uploadFileNames,FileList,status_list,l
     master_progress(mpu,num_processes,bucket,upload_list)
 
 def getBandwidth():
-	proc = subprocess.Popen('speedtest-cli', stdout=subprocess.PIPE)
+	proc = subprocess.Popen(['speedtest-cli','--bytes'], stdout=subprocess.PIPE)
 
 	strlist = proc.stdout.read().split(" ")
 	print "bandwidth = "+ strlist[len(strlist)-2]
@@ -311,6 +319,7 @@ def critical_threadnum(New_Threadnum,Threadnum,addback):
 		Threadnum.value += addback
 
 def FIFO(arg_dict,uploadFileNames,bandwidth,input_threadnum):
+    #return 
     manager = Manager()
 #    status_list = Array('i', range(len(uploadFileNames)))
     status_list = manager.list(range(len(uploadFileNames)))
@@ -345,7 +354,8 @@ def FIFO(arg_dict,uploadFileNames,bandwidth,input_threadnum):
 			    return Failure
 		    if Failure>0:
 			    print str(status_list)
-		    if Threadnum.value >0 and status_list[in_the_while_iter]==in_the_while_iter:# or str(type(status_list[in_the_while_iter]))=="<class 'boto.s3.multipart.MultiPartUpload'>"):
+		    if Threadnum.value >0 and status_list[in_the_while_iter]==in_the_while_iter:
+			    # or str(type(status_list[in_the_while_iter]))=="<class 'boto.s3.multipart.MultiPartUpload'>"):
 #			    print str(Threadnum.value)  +"  num "+str(in_the_while_iter)+ " int  " + str(status_list[in_the_while_iter]) + " wha   " + str(type(status_list[in_the_while_iter]))+ " type  " 
 #			    dict_list[i]['Retransmit']
 #			    if dict_list[i]['Retransmit']==True:
@@ -500,75 +510,84 @@ def NewResourceSize(New_Threadnum,Threadnum,lock,bandwidth,status_list):
 
 if __name__ == "__main__":
     #logging.basicConfig(level=logging.INFO)
+
     args = parser.parse_args()
     arg_dict = vars(args)
-    split_rs = urlparse.urlsplit(arg_dict['dest'])
-    if split_rs.scheme != "s3":
-	    raise ValueError("is not an S3 url")
-    s3 = S3Connection()
-    bucket = s3.get_bucket(split_rs.netloc)
-    if bucket == None:
-	    raise ValueError("'%s' is not a valid bucket" % split_rs.netloc)
-
+    print arg_dict
     if arg_dict['get']:
-	    getfile.GetTheFile(arg_dict['filepath'])
+	    getfile.GetTheFile(arg_dict['filepath'],arg_dict['dest'])
     else:
+	    split_rs = urlparse.urlsplit(arg_dict['dest'])
+	    if split_rs.scheme != "s3":    
+		raise ValueError("is not an S3 url")
+	    s3 = S3Connection()
+	    bucket = s3.get_bucket(split_rs.netloc)
+	    if bucket == None:
+            	raise ValueError("'%s' is not a valid bucket" % split_rs.netloc)
+
 	    hdlr = logging.FileHandler("bigmultipart.log")
 	    formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
 	    hdlr.setFormatter(formatter)
 	    logger.addHandler(hdlr)
 	    logger.setLevel(logging.ERROR)
-	   	
+	    '''
 	    bandwidth = float(getBandwidth())	    
 	    print "bandwidth = "+ str(bandwidth)
-
+	    '''
+	    bandwidth = 6
+	
 	    filepath = arg_dict['filepath']
 	    print arg_dict
 	    # it work for du -sh *,get the size
+	    print split_rs
 	    print filepath
 	    proc = subprocess.Popen(['du','-sk',filepath], stdout=subprocess.PIPE)
 	    strlist = proc.stdout.read().split("\t")
 	    print 'origin size is ' +str(strlist[0])
+	
 	    Uploadsize = float(strlist[0])
 
 	    uploadFileNames = []
 	    Upload_dir_Name = os.getcwd()+split_rs.path
 	    t1 = time.time()
-	    arg_dict['Threshold'] =int(bandwidth*3/2)
+	    #arg_dict['Threshold'] =int(bandwidth*3/2)
 	    if os.path.isfile(filepath):
 		Upload_dir_Name ,nocompression= compress.CompressBigFile(filepath,split_rs.path,filepath,Upload_dir_Name,False)
 		uploadFileNames.append(Upload_dir_Name)
 		afterCompressSize = 0
 		Uploadsize = os.path.getsize(Upload_dir_Name)/1024.
 	    else:
-
-	#	GZfile,METAfile,afterCompressSize = compress.Compression(filepath,split_rs.path,arg_dict['Threshold'],True)
-		GZfile,METAfile,afterCompressSize = compress.Compression(filepath,split_rs.path,arg_dict['Threshold'],False)
-		uploadFileNames = GZfile+METAfile
-	
+		# find ./ -type f |wc -l
+                p1 = subprocess.Popen(['find' ,str(filepath),'-type','f'], stdout=subprocess.PIPE)
+                p2 = subprocess.Popen(["wc","-l"], stdin=p1.stdout,stdout=subprocess.PIPE)  
+                p1.stdout.close()
+                output,err = p2.communicate()
+		number_of_file = int(output)
+                print ' number of files' + str(output)
+		listofsampling,max_compression_throughput = sample.Sampling(filepath,split_rs.path,arg_dict['Threshold'],True ,Uploadsize/number_of_file)
+		### split_rs.path = /1g/
+	 	GZfile,afterCompressSize = compress.Compression(filepath,split_rs.path,arg_dict['Threshold'],True ,listofsampling,bandwidth,max_compression_throughput)
+		'''
+#		GZfile,afterCompressSize = compress.Compression(filepath,split_rs.path,arg_dict['Threshold'],False,Uploadsize/number_of_file)
+		'''
+		uploadFileNames = GZfile
 	    '''
 
 	   # print int(int(bandwidth)/int(arg_dict['split']))
-	    uploadFileNames = ['/Users/ytlin/GitHub/storage/1g/1_data.gz', '/Users/ytlin/GitHub/storage/1g/2_data.gz', '/Users/ytlin/GitHub/storage/1g/3_data.gz', '/Users/ytlin/GitHub/storage/1g/4_data.gz', '/Users/ytlin/GitHub/storage/1g/1_data.meta', '/Users/ytlin/GitHub/storage/1g/2_data.meta', '/Users/ytlin/GitHub/storage/1g/3_data.meta', '/Users/ytlin/GitHub/storage/1g/4_data.meta']
-	    
+	    uploadFileNames = ['/Users/ytlin/Desktop/java1.8/javatest/java1.8/test/fffff.tar.gz', '/Users/ytlin/Desktop/java1.8/javatest/test/fffff.tar.gz', '/Users/ytlin/Desktop/java1.8/test/fffff.tar.gz', '/Users/ytlin/GitHub/storage/1g/10_data.gz', '/Users/ytlin/GitHub/storage/1g/11_data.gz', '/Users/ytlin/GitHub/storage/1g/12_data.gz', '/Users/ytlin/GitHub/storage/1g/13_data.gz', '/Users/ytlin/GitHub/storage/1g/14_data.gz', '/Users/ytlin/GitHub/storage/1g/15_data.gz', '/Users/ytlin/GitHub/storage/1g/16_data.gz', '/Users/ytlin/GitHub/storage/1g/17_data.gz', '/Users/ytlin/GitHub/storage/1g/18_data.gz', '/Users/ytlin/GitHub/storage/1g/19_data.gz', '/Users/ytlin/GitHub/storage/1g/1_data.gz', '/Users/ytlin/GitHub/storage/1g/20_data.gz', '/Users/ytlin/GitHub/storage/1g/21_data.gz', '/Users/ytlin/GitHub/storage/1g/22_data.gz', '/Users/ytlin/GitHub/storage/1g/23_data.gz', '/Users/ytlin/GitHub/storage/1g/2_data.gz', '/Users/ytlin/GitHub/storage/1g/3_data.gz', '/Users/ytlin/GitHub/storage/1g/4_data.gz', '/Users/ytlin/GitHub/storage/1g/5_data.gz', '/Users/ytlin/GitHub/storage/1g/6_data.gz', '/Users/ytlin/GitHub/storage/1g/7_data.gz', '/Users/ytlin/GitHub/storage/1g/8_data.gz', '/Users/ytlin/GitHub/storage/1g/9_data.gz', '/Users/ytlin/GitHub/storage/1g/10_data.meta', '/Users/ytlin/GitHub/storage/1g/11_data.meta', '/Users/ytlin/GitHub/storage/1g/12_data.meta', '/Users/ytlin/GitHub/storage/1g/13_data.meta', '/Users/ytlin/GitHub/storage/1g/14_data.meta', '/Users/ytlin/GitHub/storage/1g/15_data.meta', '/Users/ytlin/GitHub/storage/1g/16_data.meta', '/Users/ytlin/GitHub/storage/1g/17_data.meta', '/Users/ytlin/GitHub/storage/1g/18_data.meta', '/Users/ytlin/GitHub/storage/1g/19_data.meta', '/Users/ytlin/GitHub/storage/1g/1_data.meta', '/Users/ytlin/GitHub/storage/1g/20_data.meta', '/Users/ytlin/GitHub/storage/1g/21_data.meta', '/Users/ytlin/GitHub/storage/1g/22_data.meta', '/Users/ytlin/GitHub/storage/1g/23_data.meta', '/Users/ytlin/GitHub/storage/1g/2_data.meta', '/Users/ytlin/GitHub/storage/1g/3_data.meta', '/Users/ytlin/GitHub/storage/1g/4_data.meta', '/Users/ytlin/GitHub/storage/1g/5_data.meta', '/Users/ytlin/GitHub/storage/1g/6_data.meta', '/Users/ytlin/GitHub/storage/1g/7_data.meta', '/Users/ytlin/GitHub/storage/1g/8_data.meta', '/Users/ytlin/GitHub/storage/1g/9_data.meta', '/Users/ytlin/GitHub/storage/1g/Big.meta']
+	    '''	    
 
 
 
-	    '''
 	    t3 = time.time() - t1
-#	    bandwidth = 100
+	    bandwidth = 24
 	    arg_dict['split'] = int (bandwidth/2)
+#	    arg_dict['split'] =
 	    arg_dict['num_processes'] = int(bandwidth/3)
-	    Threadnum =  max( 5 ,int(bandwidth/int(arg_dict['split'])))
+	    Threadnum =  max(8,int(bandwidth/int(arg_dict['split'])))
 
-#	    Threadnum = int(20/int(arg_dict['split']))
 #	    Threadnum = 10
 	    print Threadnum
-#	    uploadDict = dict((Filepath ,'new') for Filepath in uploadFileNames)
-#	    store = arg_dict['num_processes']
-
-
-
 	    print uploadFileNames 
 	    Howmany = FIFO(arg_dict,uploadFileNames,bandwidth,Threadnum)
 
@@ -581,7 +600,7 @@ if __name__ == "__main__":
 	    if os.path.isfile(filepath) and nocompression:
 		 logger.error("Nocompression  File %s part size = %d ,concurrency = %d ,upload (ori)%0.2fM in %0.2f s (%0.2f MBps)" %  (arg_dict['filepath'],arg_dict['split'] ,arg_dict['num_processes'], Uploadsize, t2, Uploadsize/t2))
 	    else:
-	   	 shutil.rmtree(Upload_dir_Name)
+	   #	 shutil.rmtree(Upload_dir_Name)
 		 logger.error("compress = %0.2f ,reduce rate %0.2fM  File %s part size = %d ,concurrency = %d ,upload (ori)%0.2fM in %0.2f s (%0.2f MBps)" %  (t3,rate,arg_dict['filepath'],arg_dict['split'] ,arg_dict['num_processes'], Uploadsize, t2, Uploadsize/t2))
 	    print "finish"
 	    for mp in bucket.list_multipart_uploads():
