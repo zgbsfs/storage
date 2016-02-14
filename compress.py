@@ -330,7 +330,10 @@ def Compression(rootDir,S3KeyName,Threshold,compression,listofsampling,expectSpe
 	UploadFileList.append(CompressedMeta)
 	print UploadFileList
 	print UploadBigFileList
-	return	
+	totalupsize=0
+	for i in UploadFileList+UploadBigFileList:
+		totalupsize+=os.path.getsize(i)
+	return UploadFileList+UploadBigFileList ,totalupsize
 	'''
 	for ( sourceDir, dirname, filename) in os.walk(rootDir):
 		for f in filename:

@@ -307,7 +307,6 @@ def Thread_Upload(New_Threadnum,Threadnum,uploadFileNames,FileList,status_list,l
 
 def getBandwidth():
 	proc = subprocess.Popen(['speedtest-cli','--bytes'], stdout=subprocess.PIPE)
-
 	strlist = proc.stdout.read().split(" ")
 	print "bandwidth = "+ strlist[len(strlist)-2]
 	return  strlist[len(strlist)-2]
@@ -531,10 +530,9 @@ if __name__ == "__main__":
 	    hdlr.setFormatter(formatter)
 	    logger.addHandler(hdlr)
 	    logger.setLevel(logging.ERROR)
-	    '''
-	    bandwidth = float(getBandwidth())	    
-	    print "bandwidth = "+ str(bandwidth)
-	    '''
+
+#	    bandwidth = float(getBandwidth())	    
+#	    print "bandwidth = "+ str(bandwidth)
 	    bandwidth = 6
 	
 	    filepath = arg_dict['filepath']
@@ -581,16 +579,20 @@ if __name__ == "__main__":
 
 
 	    t3 = time.time() - t1
-	    bandwidth = 24
-	    arg_dict['split'] = int (bandwidth/2)
+	    
+	   # bandwidth = 24
+	    arg_dict['split'] = max( 5,int (bandwidth))
 #	    arg_dict['split'] =
-	    arg_dict['num_processes'] = int(bandwidth/3)
+	    arg_dict['num_processes'] = max(5,int(bandwidth))
 	    Threadnum =  max(8,int(bandwidth/int(arg_dict['split'])))
 
 #	    Threadnum = 10
 	    print Threadnum
 	    print uploadFileNames 
-	    Howmany = FIFO(arg_dict,uploadFileNames,bandwidth,Threadnum)
+	    if Threadnum ==0:
+		    pass
+	    else:
+		    Howmany = FIFO(arg_dict,uploadFileNames,bandwidth,Threadnum)
 
 	    t2 = time.time() - t1
 	    print "total time= "+str(t2)

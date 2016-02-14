@@ -60,6 +60,8 @@ def packAndShow(aList, maxValue):
 
         #print aList
         bins = pack(aList, maxValue)
+	if len(bins)==1:
+		return bins
 	diffarr=[]
 	print 'Solution using', len(bins), 'bins:'
 	for bin in bins:
@@ -71,8 +73,7 @@ def packAndShow(aList, maxValue):
 	diffarr.pop()
 	copydiffarr = copy.copy(diffarr)
 	delta =0
-
-	for howmany in range(len(lastbin)):
+	for howmany in range(min(len(diffarr),len(lastbin))):
 		delta+=max(diffarr)
 		diffarr.pop()
 	print diffarr
