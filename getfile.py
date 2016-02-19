@@ -8,7 +8,7 @@ import tarfile
 def longpath(keyname):
 	Split = keyname.split('/')
 	string=''
-	for i in range(2,len(Split)-1):
+	for i in range(1,len(Split)-2):
 		print i
 		string +=Split[i]
 		string +='_'
@@ -26,8 +26,8 @@ def parseMeta(local,keyname):
 		Split[1]='UnderRoot'
 	elif len(Split)>3:
 		longSplit.append(Split[0])
-		longSplit.append(Split[1])
 		longSplit.append(longpath(keyname))
+		longSplit.append(Split[len(Split)-1])
 		Split = longSplit
 	print Split
 	Tarf=[]
@@ -54,6 +54,7 @@ def parseMeta(local,keyname):
 						indexofbinthing = content.index(thing)
 					except:
 						continue
+				print 'index of bin '  + str(indexofbinthing)
 				objoncloud = filenameintar.split('.')[0]
 				member = memberlist[memberindex+1]
 				filenameintar =  str(member).split('\'')[1]
@@ -116,7 +117,7 @@ def GetTheFile(Filepath,dest):
 	if Tarf[0]:
 		response = client.get_object(Bucket=bucketname,Key=objoncloud,Range='bytes='+str(binhead)+'-'+str(bintail-1))
 		res_content = response['Body'].read()
-		with open(temp,'wb') as newfile:
+		with open(temp,'w') as newfile:
 			newfile.write(res_content)
 		newfile.close()
 		with tarfile.open(temp, "r:gz") as tar:

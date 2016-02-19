@@ -306,19 +306,20 @@ def Compression(rootDir,S3KeyName,Threshold,compression,listofsampling,expectSpe
 				UploadBigFileList.append(return_path)
 			else:
 				item[return_path]  = return_size
-	print "onlyfilesfdasopfask;ls"
+	print "start bin pack"
 	sorted_x = sorted(item.items(), key=operator.itemgetter(1), reverse=True)
 #	sorted_x.append(('/Users/ytlin/GitHub/storage/1g/imaadsfasdfsa_data', 12546228))
 #	sorted_x.append(('/Users/ytlin/GitHub/storage/1g/imaadsfasdfsa_data', 11546228))
 	bins =binpack.packAndShow(sorted_x,Threshold*MB)
+	return
 	binnum=0
 	UploadFileList+= UploadBigFileList
 	for bin in bins:
 		WriteToMeta_list=[]
 		binnum+=1
 		file_in_bin , size_in_bin =  bin.getitempath()
-		print file_in_bin 
-		print size_in_bin
+	#	print file_in_bin 
+	#	print size_in_bin
 		uploadbins = file_to_bin(file_in_bin,rootDir,WaitingToUpload,binnum)
 		UploadFileList.append(uploadbins)	
 		for item in file_in_bin:

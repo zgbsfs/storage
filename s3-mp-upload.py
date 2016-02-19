@@ -513,7 +513,6 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     arg_dict = vars(args)
-    print arg_dict
     if arg_dict['get']:
 	    getfile.GetTheFile(arg_dict['filepath'],arg_dict['dest'])
     else:
@@ -531,12 +530,11 @@ if __name__ == "__main__":
 	    logger.addHandler(hdlr)
 	    logger.setLevel(logging.ERROR)
 
-#	    bandwidth = float(getBandwidth())	    
-#	    print "bandwidth = "+ str(bandwidth)
-	    bandwidth = 6
+	    bandwidth = float(getBandwidth())	    
+	    #print "bandwidth = "+ str(bandwidth)
+#	    bandwidth = 10
 	
 	    filepath = arg_dict['filepath']
-	    print arg_dict
 	    # it work for du -sh *,get the size
 	    print split_rs
 	    print filepath
@@ -549,7 +547,13 @@ if __name__ == "__main__":
 	    uploadFileNames = []
 	    Upload_dir_Name = os.getcwd()+split_rs.path
 	    t1 = time.time()
-	    #arg_dict['Threshold'] =int(bandwidth*3/2)
+
+	    arg_dict['Threshold'] =max(25,int(bandwidth*5))
+	    arg_dict['split'] = max( 5,int (bandwidth))
+	    arg_dict['num_processes'] = max(5,int(bandwidth/2))
+	    Threadnum =  max(8,int(bandwidth/int(arg_dict['split'])))
+
+	    print arg_dict
 	    if os.path.isfile(filepath):
 		Upload_dir_Name ,nocompression= compress.CompressBigFile(filepath,split_rs.path,filepath,Upload_dir_Name,False)
 		uploadFileNames.append(Upload_dir_Name)
@@ -570,21 +574,8 @@ if __name__ == "__main__":
 #		GZfile,afterCompressSize = compress.Compression(filepath,split_rs.path,arg_dict['Threshold'],False,Uploadsize/number_of_file)
 		'''
 		uploadFileNames = GZfile
-	    '''
-
-	   # print int(int(bandwidth)/int(arg_dict['split']))
-	    uploadFileNames = ['/Users/ytlin/Desktop/java1.8/javatest/java1.8/test/fffff.tar.gz', '/Users/ytlin/Desktop/java1.8/javatest/test/fffff.tar.gz', '/Users/ytlin/Desktop/java1.8/test/fffff.tar.gz', '/Users/ytlin/GitHub/storage/1g/10_data.gz', '/Users/ytlin/GitHub/storage/1g/11_data.gz', '/Users/ytlin/GitHub/storage/1g/12_data.gz', '/Users/ytlin/GitHub/storage/1g/13_data.gz', '/Users/ytlin/GitHub/storage/1g/14_data.gz', '/Users/ytlin/GitHub/storage/1g/15_data.gz', '/Users/ytlin/GitHub/storage/1g/16_data.gz', '/Users/ytlin/GitHub/storage/1g/17_data.gz', '/Users/ytlin/GitHub/storage/1g/18_data.gz', '/Users/ytlin/GitHub/storage/1g/19_data.gz', '/Users/ytlin/GitHub/storage/1g/1_data.gz', '/Users/ytlin/GitHub/storage/1g/20_data.gz', '/Users/ytlin/GitHub/storage/1g/21_data.gz', '/Users/ytlin/GitHub/storage/1g/22_data.gz', '/Users/ytlin/GitHub/storage/1g/23_data.gz', '/Users/ytlin/GitHub/storage/1g/2_data.gz', '/Users/ytlin/GitHub/storage/1g/3_data.gz', '/Users/ytlin/GitHub/storage/1g/4_data.gz', '/Users/ytlin/GitHub/storage/1g/5_data.gz', '/Users/ytlin/GitHub/storage/1g/6_data.gz', '/Users/ytlin/GitHub/storage/1g/7_data.gz', '/Users/ytlin/GitHub/storage/1g/8_data.gz', '/Users/ytlin/GitHub/storage/1g/9_data.gz', '/Users/ytlin/GitHub/storage/1g/10_data.meta', '/Users/ytlin/GitHub/storage/1g/11_data.meta', '/Users/ytlin/GitHub/storage/1g/12_data.meta', '/Users/ytlin/GitHub/storage/1g/13_data.meta', '/Users/ytlin/GitHub/storage/1g/14_data.meta', '/Users/ytlin/GitHub/storage/1g/15_data.meta', '/Users/ytlin/GitHub/storage/1g/16_data.meta', '/Users/ytlin/GitHub/storage/1g/17_data.meta', '/Users/ytlin/GitHub/storage/1g/18_data.meta', '/Users/ytlin/GitHub/storage/1g/19_data.meta', '/Users/ytlin/GitHub/storage/1g/1_data.meta', '/Users/ytlin/GitHub/storage/1g/20_data.meta', '/Users/ytlin/GitHub/storage/1g/21_data.meta', '/Users/ytlin/GitHub/storage/1g/22_data.meta', '/Users/ytlin/GitHub/storage/1g/23_data.meta', '/Users/ytlin/GitHub/storage/1g/2_data.meta', '/Users/ytlin/GitHub/storage/1g/3_data.meta', '/Users/ytlin/GitHub/storage/1g/4_data.meta', '/Users/ytlin/GitHub/storage/1g/5_data.meta', '/Users/ytlin/GitHub/storage/1g/6_data.meta', '/Users/ytlin/GitHub/storage/1g/7_data.meta', '/Users/ytlin/GitHub/storage/1g/8_data.meta', '/Users/ytlin/GitHub/storage/1g/9_data.meta', '/Users/ytlin/GitHub/storage/1g/Big.meta']
-	    '''	    
-
-
-
 	    t3 = time.time() - t1
 	    
-	   # bandwidth = 24
-	    arg_dict['split'] = max( 5,int (bandwidth))
-#	    arg_dict['split'] =
-	    arg_dict['num_processes'] = max(5,int(bandwidth))
-	    Threadnum =  max(8,int(bandwidth/int(arg_dict['split'])))
 
 #	    Threadnum = 10
 	    print Threadnum

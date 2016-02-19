@@ -63,23 +63,29 @@ def packAndShow(aList, maxValue):
 	if len(bins)==1:
 		return bins
 	diffarr=[]
+	a = maxValue
 	print 'Solution using', len(bins), 'bins:'
 	for bin in bins:
 		diffarr.append( maxValue-bin.sum)
-            	print bin
-		lastbin = bin
+		print bin
+		if a > bin.sum:
+			lastbin=bin
+            		a= lastbin.sum
+
+	
 	print "sum of different    " + str(sum(diffarr))
-	bins.pop()
-	diffarr.pop()
+	diffarr.pop(bins.index(lastbin))
+	bins.remove(lastbin)
+#	diffarr.pop()
 	copydiffarr = copy.copy(diffarr)
 	delta =0
 	for howmany in range(min(len(diffarr),len(lastbin))):
 		delta+=max(diffarr)
-		diffarr.pop()
+		diffarr.remove(max(diffarr))
 	print diffarr
 	print copydiffarr
 
-	if delta +maxValue> 2*lastbin.sum:
+	if delta +maxValue> 2*a:
 		print "repack bins"
 		for item in lastbin:
 			binindex = copydiffarr.index(max(copydiffarr))

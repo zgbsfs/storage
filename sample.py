@@ -12,7 +12,7 @@ import subprocess
 import  random
 import operator
 
-Percentage = 0.05
+Percentage = 0.1
 MB = 1024*1024.0
 def Compress_list(list_of_file) :
 #       print WaitingToUpload  /Users/ytlin/GitHub/storage/1g/
@@ -45,7 +45,7 @@ def Compress_list(list_of_file) :
 	else:
 		rate = float(new)/float(orisize)
 	throughput = orisize/float(dur)
-	print os.remove('sample_file_removenow')	
+	os.remove('sample_file_removenow')	
 	
         return rate , throughput/(1024*1024.)
 def Sampling(filepath,S3KeyName,CombineThreshold,True ,avgFilesize):
@@ -59,15 +59,13 @@ def Sampling(filepath,S3KeyName,CombineThreshold,True ,avgFilesize):
 	dic={}
 	os.walk(filepath)
 	for ( sourceDir, dirname,filename) in os.walk(filepath):
-		print sourceDir
-#		print dirname
-#		print filename
-		
 		dic['path'] = sourceDir
 		randomtime =int(Percentage*len(filename))
 
 		if not filename:
+			print str(sourceDir)+'   no file ' 
 			continue
+		print sourceDir
 		if randomtime < 1:
 			randomtime=1
 		print str(len(filename))+"   files choose  "+ str(randomtime)		
