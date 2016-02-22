@@ -95,5 +95,5 @@ Download: (now only support single file download)
 $ ./s3-mp-upload.py -get s3://yourbucket/your/file/path /The/path/you/download
 
 if you want to download the file /newname/a.jpg from bucket *us-east-1* ,to local "download.jpg"
-$ ./s3-mp-upload.py -f  s3://us-east-1/newname/a.jpg  download.jpg
+$ ./s3-mp-upload.py -get  s3://us-east-1/newname/a.jpg  download.jpg
 ```
