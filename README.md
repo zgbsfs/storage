@@ -1,5 +1,3 @@
-# storage
-
 Installation
 --------------------
 python-magic
@@ -40,6 +38,32 @@ configuration boto,boto3
 
 Usage
 -----
+
+```
+usage: s3-mp-upload [-h] [-n NUM_PROCESSES] [-f] [-s SPLIT] [-Thres THRESHOLD]
+                    [-S SIMULATE] [-get] [--Retransmit]
+                    filepath dest
+
+Transfer large files to S3
+
+positional arguments:
+  filepath              The file to transfer
+  dest                  The S3 destination object
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -n NUM_PROCESSES, --num-processes NUM_PROCESSES
+                        Number of processors to use
+  -f, --force           Overwrite an existing S3 key
+  -s SPLIT, --split SPLIT
+                        Split size, in Mb
+  -Thres THRESHOLD, --Threshold THRESHOLD
+                        compression size
+  -S SIMULATE, --simulate SIMULATE
+                        Enable simulation with the time per error
+  -get                  the path
+  --Retransmit
+```
 
 Upload directory:
 
