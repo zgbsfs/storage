@@ -74,7 +74,7 @@ optional arguments:
 Upload directory:
 
 ```sh
-$ ./s3-mp-upload.py -f /The/directory/with'/'/ s3://yourbucket/keyname/ 
+$ ./s3-mp-upload.py -f /The/directory/with'/'/ s3://yourbucket/keyname**/** 
 ```
 
 Upload file:
