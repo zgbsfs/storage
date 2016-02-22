@@ -1,5 +1,11 @@
 Installation
 --------------------
+
+speedtest-cli
+```
+$ sudo easy_install speedtest-cli
+```
+
 python-magic
 ```
 $ sudo easy_install magic
@@ -33,8 +39,8 @@ $ sudo easy_install numpy
 configuration boto,boto3
 ------------------------
 
-[boto3](https://boto3.readthedocs.org/en/latest/guide/quickstart.html#configuration)
 [boto](http://boto.cloudhackers.com/en/latest/getting_started.html#configuring-boto-credentials)
+[boto3](https://boto3.readthedocs.org/en/latest/guide/quickstart.html#configuration)
 
 Usage
 -----
@@ -61,8 +67,8 @@ optional arguments:
                         compression size
   -S SIMULATE, --simulate SIMULATE
                         Enable simulation with the time per error
-  -get                  the path
-  --Retransmit
+  -get                  download the single file from s3 path
+  --Retransmit          Enable Retransmition simulation
 ```
 
 Upload directory:
@@ -77,7 +83,7 @@ Upload file:
 $ ./s3-mp-upload.py -f /The/file/path/without'/' s3://yourbucket/keyname
 ```
 
-Download:
+Download: (now only support single file download)
 
 ```sh
 $ ./s3-mp-upload.py -get s3://yourbucket/your/file/path /The/path/you/download
