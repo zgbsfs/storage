@@ -75,8 +75,11 @@ Upload directory:
 
 ```sh
 $ ./s3-mp-upload.py -f /The/directory/with'/'/ s3://yourbucket/keyname/
-
+```
+```
 if you want to upload the hold directory *example* ,to bucket *us-east-1* ,named *ex*
+```
+```
 $ ./s3-mp-upload.py -f /example/ s3://us-east-1/ex/ 
 ```
 
