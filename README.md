@@ -8,7 +8,7 @@ $ sudo easy_install speedtest-cli
 
 python-magic
 ```
-$ sudo easy_install magic
+$ sudo easy_install python-magic
 ```
 
 boto3
