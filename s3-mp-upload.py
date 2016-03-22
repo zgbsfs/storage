@@ -26,16 +26,17 @@ import getfile
 from threading import Thread,Lock,currentThread
 from traffic import initargs
 import numpy
-
+import psutil
+from traffic import bytes2human
 parser = argparse.ArgumentParser(description="Transfer large files to S3",
         prog="s3-mp-upload")
 parser.add_argument("filepath",  help="The file to transfer")
 parser.add_argument("dest", help="The S3 destination object")
 parser.add_argument("-n", "--num-processes", help="Number of processors to use",
-        type=int, default=2)
+        type=int)
 parser.add_argument("-f", "--force", help="Overwrite an existing S3 key",
         action="store_true")
-parser.add_argument("-s", "--split", help="Split size, in Mb", type=int, default=50)
+parser.add_argument("-s", "--split", help="Split size, in Mb", type=int)
 parser.add_argument("-Thres", "--Threshold", help="compression size", type=int)
 parser.add_argument("-S", "--simulate", help="Enable simulation with the time per error ",type=int ,default=0)
 parser.add_argument("-get",help="download the single file from s3 path ", default=False,  action="store_true")
@@ -299,12 +300,39 @@ def Thread_Upload(New_Threadnum,Threadnum,uploadFileNames,FileList,status_list,l
     t1 = time.time()
     master_progress(mpu,num_processes,bucket,upload_list)
 
-def getBandwidth():
+def getBandwidth(bucket):
 	print "start speedtest"
+	size = 1024*1024*25
+	chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+	data = chars * (int(round(int(size) / 36.0)))
+	testuploaddata = ('content1=%s' % data[0:int(size) - 9]).encode()
+	del data
+
+	@timeout(10, os.strerror(errno.ETIMEDOUT))
+	def uploadtest(testuploaddata,bucket):
+	    try:
+		print "try"
+		t1 = time.time()
+		print "start s3 uploadtest "
+		tot_before = psutil.net_io_counters()
+		k = boto.s3.key.Key(bucket,'uploadtest')
+		k.set_contents_from_string(testuploaddata)
+		t2 =time.time() -t1
+		sitethroughput = 25./t2
+		return sitethroughput
+	    except Exception, err:
+		print err
+		print "exce"
+		tot_after = psutil.net_io_counters()
+		diff_sent = tot_after.bytes_sent-tot_before.bytes_sent
+		print 'sent : '+ str(bytes2human(diff_sent)) +" in %d second ,speed = " % (10)+str(bytes2human(diff_sent/10))
+		return diff_sent/1000/1000/10.
+
+	sitethroughput = uploadtest(testuploaddata,bucket)	
 	proc = subprocess.Popen(['speedtest-cli','--bytes'], stdout=subprocess.PIPE)
 	strlist = proc.stdout.read().split(" ")
 	print "bandwidth = "+ strlist[len(strlist)-2]
-	return  strlist[len(strlist)-2]
+	return  float(strlist[len(strlist)-2]),sitethroughput
 
 def critical_threadnum(New_Threadnum,Threadnum,addback):
 	NewValue = New_Threadnum.value
@@ -524,8 +552,9 @@ if __name__ == "__main__":
 	    hdlr.setFormatter(formatter)
 	    logger.addHandler(hdlr)
 	    logger.setLevel(logging.ERROR)
-
-	    bandwidth = float(getBandwidth())	    
+	
+	    bandwidth,singlethroughput = getBandwidth(bucket)	  
+	    print "single thr %f " % singlethroughput
 	    #print "bandwidth = "+ str(bandwidth)
 #	    bandwidth = 10
 	
@@ -545,11 +574,11 @@ if __name__ == "__main__":
 	    if not arg_dict['Threshold']:
 		    arg_dict['Threshold'] =max(25,int(bandwidth*3))
 	    if not arg_dict['split']:
-		    arg_dict['split'] = max( 5,int (bandwidth))
+		    arg_dict['split'] = max(5,int (bandwidth))
 	    if not arg_dict['num_processes']:
-		    arg_dict['num_processes'] = max(5,int(bandwidth/2))
+		    arg_dict['num_processes'] = max(5,int(bandwidth/singlethroughput))
 
-	    Threadnum =  max(8,int(bandwidth/int(arg_dict['split'])))
+	    Threadnum =  max(10,int(bandwidth*1.5/singlethroughput)))
 
 	    print arg_dict
 	    if os.path.isfile(filepath):
