@@ -578,7 +578,7 @@ if __name__ == "__main__":
 	    if not arg_dict['num_processes']:
 		    arg_dict['num_processes'] = max(5,int(bandwidth/singlethroughput))
 
-	    Threadnum =  max(10,int(bandwidth*1.5/singlethroughput)))
+	    Threadnum =  max(10,int(bandwidth*1.5/singlethroughput))
 
 	    print arg_dict
 	    if os.path.isfile(filepath):
