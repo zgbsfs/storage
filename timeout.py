@@ -12,8 +12,13 @@ def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
             raise TimeoutError(error_message)
         
         def wrapper(*args, **kwargs):
+	    g = func.func_globals
+	    sentinel = object()
+
+	    oldvalue = g.get('sp', sentinel)
             signal.signal(signal.SIGALRM, _handle_timeout)
-            signal.alarm(seconds)
+	    print oldvalue
+            signal.alarm(oldvalue)
             try:
                 result = func(*args, **kwargs)
             finally:

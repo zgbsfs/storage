@@ -36,6 +36,11 @@ numpy
 $ sudo easy_install numpy
 ```
 
+LiveStats
+```
+$ sudo pip install LiveStats
+```
+
 configuration boto,boto3
 ------------------------
 
