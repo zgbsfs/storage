@@ -255,7 +255,7 @@ def Compression(rootDir,S3KeyName,Threshold,compression,listofsampling,expectSpe
 			    if not os.path.isfile(os.path.join(mypath, f)):
 				continue
 			    sourcepath =  os.path.join(mypath, f)
-			    if  Combine_size+os.path.getsize(sourcepath) < Threshold * MB:
+			    if  Combine_size+os.path.getsize(sourcepath) < 1024 * MB:
 				    if os.path.getsize(sourcepath) > Threshold * MB:
 					localtime = time.asctime( time.localtime(time.time()) )
 					print "Local current time :", localtime
@@ -278,6 +278,7 @@ def Compression(rootDir,S3KeyName,Threshold,compression,listofsampling,expectSpe
 				CombinedFileName = Combine_file(combine_list,rootDir,WaitingToUpload,FileCounter,inputforname)
 				metapath,sizepath = Metadata(WriteToMeta_list,size_list,CombinedFileName)
 				item[CombinedFileName]  = Combine_size
+				itemlist.append(CombinedFileName)
 				NewFileName.append(metapath)
 				NewFileName.append(sizepath)
 				Uploadsize += Combine_size
@@ -291,6 +292,7 @@ def Compression(rootDir,S3KeyName,Threshold,compression,listofsampling,expectSpe
 				CombinedFileName = Combine_file(combine_list,rootDir,WaitingToUpload,FileCounter,inputforname)
 				metapath,sizepath = Metadata(WriteToMeta_list,size_list,CombinedFileName)
 				item[CombinedFileName]  = Combine_size
+				itemlist.append(CombinedFileName)
                                 Combine_size=0
                                 combine_list=[]
                                 WriteToMeta_list=[]
@@ -306,6 +308,7 @@ def Compression(rootDir,S3KeyName,Threshold,compression,listofsampling,expectSpe
 				UploadBigFileList.append(return_path)
 			else:
 				item[return_path]  = return_size
+	return itemlist,10000000
 	print "start bin pack"
 	sorted_x = sorted(item.items(), key=operator.itemgetter(1), reverse=True)
 	bins =binpack.packAndShow(sorted_x,Threshold*MB)
