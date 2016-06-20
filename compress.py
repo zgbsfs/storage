@@ -104,41 +104,12 @@ def Compress_list(list_of_file,sourceDir,WaitingToUpload,inputforname,S3KeyName)
 	if inputforname=='':
 		inputforname='UnderRoot'
 	b = sourceDir.replace(sourceDir,WaitingToUpload)+inputforname.replace('/','_')+'-files.tar.gz'
-	'''    back up
-	compression file bigger than expected compression size
-	filearr=[]
-	sizearr =[]
-	readsize=0
-	part=0
-	filearr.append(b)
-	'''
+	''
 	tar=tarfile.open(b,'w:gz')
 
 	for f in list_of_file:
 		tar.add(f,arcname=f.replace(sourceDir,S3KeyName))
-		'''   backup
-		readsize +=os.path.getsize(f)
-		if Totalsize > readsize:	
-			tar.add(f,arcname=f.replace(sourceDir,S3KeyName))
-		else:# many file situation 
-			part+=1
-			tar.close()
-			newname = b+str(part)
-			filearr.append(newname)
-			tar=tarfile.open(newname,'w:gz')
-			tar.add(f,arcname=f.replace(sourceDir,S3KeyName))
-			readsize = os.path.getsize(f)
-		'''	
 	tar.close()
-	'''   backup
-	if part >0:#many file situation 
-		for f in filearr:
-			sizearr.append(os.path.getsize(f))	
-		return filearr,sizearr
-	else:
-		new = os.path.getsize(b)
-		return b,new
-	'''
 	new = os.path.getsize(b)
 	return b,new
 def Compress_all_files(Dirpath,S3KeyName):
@@ -219,28 +190,13 @@ def Compression(rootDir,S3KeyName,Threshold,compression,listofsampling,expectSpe
 	localtime = time.asctime( time.localtime(time.time()))
 	sampling=[]
 	UploadFileList=[]
-	'''
-	print rootDir	
-	p1 = subprocess.Popen(['find' ,str(rootDir),'-type','f'], stdout=subprocess.PIPE)
-#	print proc.stdout.read()
-	p2 = subprocess.Popen(["wc","-l"], stdin=p1.stdout,stdout=subprocess.PIPE)
-	p1.stdout.close()
-	output,err = p2.communicate()
-	print int(output)
-
-	return
-	'''
+	''
 	print "Local current time :", localtime
 #	sample_threshold = int(sampling_percentage*Threshold*1024/avg_file_size)
 #	print "how many file need to ?? "  +str(sample_threshold)
 	sampling_count = 0
 	samplesize =0
-	'''
-	print os.listdir(rootDir)
-	for i in range(5):
-
-		print random.choice(os.listdir(rootDir))
-	'''
+	''
 	metalist=[]
 	item={}
 	itemlist =[]
@@ -331,78 +287,3 @@ def Compression(rootDir,S3KeyName,Threshold,compression,listofsampling,expectSpe
 		totalupsize+=os.path.getsize(i)
 
 	return UploadFileList+UploadBigFileList ,totalupsize
-	'''
-	for ( sourceDir, dirname, filename) in os.walk(rootDir):
-		for f in filename:
-		    sourcepath =  os.path.join(sourceDir, f)
-
-		    if  Combine_size < Threshold * MB:
-			    if os.path.getsize(sourcepath) > Threshold * MB:
-				localtime = time.asctime( time.localtime(time.time()) )
-				print "Local current time :", localtime
-				#big file list
-				Uploadsize += os.path.getsize(sourcepath)
-				Newpath , Metapath = CompressBigFile(sourcepath,S3KeyName,rootDir,WaitingToUpload,True)
-				UploadBigFileList.append(Newpath)
-			        BigFileList.append(Metapath)
-				WriteToBigFileMetaList.append(Metapath.replace(rootDir,S3KeyName))
-			    else:
-				#small file connect    
-				Combine_size+=os.path.getsize(sourcepath)
-				combine_list.append(sourcepath)
-				WriteToMeta_list.append(sourcepath.replace(rootDir,S3KeyName))
-				size_list.append(Combine_size)
-				#print total_sizste
-		    else:
-			FileCounter = FileCounter +1
-			print FileCounter
-			
-			CombinedFileName = Combine_files(combine_list,rootDir,WaitingToUpload,FileCounter)
-		 	metapath,sizepath = Metadata(WriteToMeta_list,size_list,CombinedFileName)
-			NewFileName.append(metapath)
-			NewFileName.append(sizepath)
-			Uploadsize += Combine_size
-			Combine_size=0
-			combine_list=[]
-			WriteToMeta_list=[]
-			size_list=[]
-	#break the for loop ,combined remaining files
-	if Combine_size >0:
-		Uploadsize += Combine_size
-		FileCounter = FileCounter +1
-		#print "other + percentage  " + str(Y/(Y+N))
-		CombinedFileName = Combine_files(combine_list,rootDir,WaitingToUpload,FileCounter)
-		metapath,sizepath = Metadata(WriteToMeta_list,size_list,CombinedFileName)
-		NewFileName.append(metapath)
-		NewFileName.append(sizepath)
-
-	if BigFileList: 
-		BigFileMetadata(BigFileList,WaitingToUpload)
-	b=0
-	Metadatalist     = Metadata_list(WaitingToUpload)
-#	with open('testaaaaaaaa', 'wb') as f:
-#		pickle.dump(sampling, f)
-	
-	if not compression:
-		for f in NewFileName+UploadBigFileList+Metadatalist:
-			b+=os.path.getsize(f)
-		print "== FAlse"
-		return NewFileName+UploadBigFileList,Metadatalist,b
-	else:
-		Compressfilelist = Compress_all_files(WaitingToUpload,S3KeyName)
-
-
-		for f in UploadBigFileList+Compressfilelist:
-			b+=os.path.getsize(f)
-		print "== TRUe"
-		return UploadBigFileList+Compressfilelist ,Metadatalist,b
-	'''
-	'''
-	Combine_files(Compressfilelist,rootDir,WaitingToUpload,"upload")
-	print combine_size_list
-	print '\n'
-	Metafilelist ,combine_meta_size_list = Metadata_list(WaitingToUpload)
-	Combine_files(Metafilelist,rootDir,WaitingToUpload,"Meta")
-	print combine_meta_size_list
-	print '\n'
-	'''
